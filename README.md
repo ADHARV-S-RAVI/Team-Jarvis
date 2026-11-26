@@ -53,20 +53,16 @@ All capabilities should be interpreted according to their documented implementat
 
 *Q-SHIELD operator dashboard — replace this placeholder with an actual application screenshot.*
 
-<!-- SECURITY INTEGRITY CENTER SCREENSHOT PLACEHOLDER -->
-<!-- Add the screenshot at docs/assets/security-integrity-center.png -->
+
+<img width="1535" height="732" alt="image" src="https://github.com/user-attachments/assets/7e9dd08d-1058-41a7-9cd7-140dd822c8cd" />
+
 
 ![Security Integrity Center](docs/assets/security-integrity-center.png)
 
 *Security Integrity Center — identity assurance and file integrity monitoring.*
 
-<!-- ADDITIONAL SCREENSHOTS PLACEHOLDER -->
-<!-- Suggested screenshots:
-     docs/assets/device-management.png
-     docs/assets/key-management.png
-     docs/assets/audit-ledger.png
-     docs/assets/threat-detection.png
--->
+<img width="1535" height="725" alt="image" src="https://github.com/user-attachments/assets/275637db-b86c-4734-8368-737d5e2651a7" />
+
 
 ## 4. System Architecture
 

@@ -1,0 +1,134 @@
+{
+  "generated_at": "2026-11-26T16:37:22.884186+00:00",
+  "total_checks": 18,
+  "passed": 18,
+  "failed": 0,
+  "checks": [
+    {
+      "id": "SEC-01",
+      "name": "Unauthorized Password Takeover Blocked",
+      "category": "Authentication",
+      "status": "PASS",
+      "detail": "Unauthenticated /auth/set-password rejected with HTTP 403"
+    },
+    {
+      "id": "SEC-02",
+      "name": "Salted Scrypt Password Auth",
+      "category": "Authentication",
+      "status": "PASS",
+      "detail": "Authorized salted scrypt password verified and session issued"
+    },
+    {
+      "id": "SEC-03",
+      "name": "Invalid Password Rejection",
+      "category": "Authentication",
+      "status": "PASS",
+      "detail": "Invalid password rejected with HTTP 401"
+    },
+    {
+      "id": "SEC-04",
+      "name": "Session Revocation Enforcement",
+      "category": "Session Security",
+      "status": "PASS",
+      "detail": "Revoked session token fails validation immediately"
+    },
+    {
+      "id": "SEC-05",
+      "name": "RBAC Least-Privilege Deny",
+      "category": "Authorization",
+      "status": "PASS",
+      "detail": "Auditor denied actor:revoke (fail-closed RBAC)"
+    },
+    {
+      "id": "SEC-06",
+      "name": "Fail-Closed Unknown Action",
+      "category": "Authorization",
+      "status": "PASS",
+      "detail": "Unknown action denied by default"
+    },
+    {
+      "id": "SEC-07",
+      "name": "Device Revocation Enforcement",
+      "category": "Trust Plane",
+      "status": "PASS",
+      "detail": "Revoked device denied access (fail-closed)"
+    },
+    {
+      "id": "SEC-08",
+      "name": "Key Generation & Rotation",
+      "category": "Cryptography",
+      "status": "PASS",
+      "detail": "Rotated key to v3"
+    },
+    {
+      "id": "SEC-09",
+      "name": "Crash-Safe Journaled Recovery",
+      "category": "Resilience",
+      "status": "PASS",
+      "detail": "Recovered crashed journaled rotation d75caf9b-b732-486c-bbf6-d6f474f9a54f"
+    },
+    {
+      "id": "SEC-10",
+      "name": "Key Compromise Quarantine",
+      "category": "Cryptography",
+      "status": "PASS",
+      "detail": "Key key-v5 marked COMPROMISED and new active key rotated"
+    },
+    {
+      "id": "SEC-11",
+      "name": "AES-256-GCM Vault Confidentiality",
+      "category": "Cryptography",
+      "status": "PASS",
+      "detail": "AES-256-GCM vault round-trip verified"
+    },
+    {
+      "id": "SEC-12",
+      "name": "Messaging Replay Protection",
+      "category": "Protocol Security",
+      "status": "PASS",
+      "detail": "Duplicate message delivery/replay rejected"
+    },
+    {
+      "id": "SEC-13",
+      "name": "Audit Hash-Chain & Tamper Detection",
+      "category": "Auditability",
+      "status": "PASS",
+      "detail": "Audit chain valid (39 events) and tamper detection verified"
+    },
+    {
+      "id": "SEC-14",
+      "name": "Deterministic Rule Detector",
+      "category": "Detection",
+      "status": "PASS",
+      "detail": "Deterministic detector ran cleanly (alerts=0)"
+    },
+    {
+      "id": "SEC-15",
+      "name": "WebAuthn Challenge Replay Guard",
+      "category": "Identity Assurance",
+      "status": "PASS",
+      "detail": "Single-use WebAuthn challenge replay blocked"
+    },
+    {
+      "id": "SEC-16",
+      "name": "System File Integrity Monitoring",
+      "category": "Integrity",
+      "status": "PASS",
+      "detail": "FIM baseline & scan executed (status=OK)"
+    },
+    {
+      "id": "SEC-17",
+      "name": "Backup Manifest Digest Verification",
+      "category": "Integrity",
+      "status": "PASS",
+      "detail": "Backup manifest valid; tampered digest rejected"
+    },
+    {
+      "id": "SEC-18",
+      "name": "Simulated Node Partition Recovery",
+      "category": "Sandbox Simulation",
+      "status": "PASS",
+      "detail": "Simulated node partition recovery and reconciliation verified"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+# Python & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+
+# Local SQLite databases & runtime key/upload stores
+qshield.db
+qshield.db-shm
+qshield.db-wal
+.qshield_keys/
+.qshield_uploads/
+
+# Environment files
+.env
+.env.local
+
+# Frontend dependencies & build outputs
+frontend/node_modules/
+frontend/dist/
+
+# Official Track 4 Toolkit (kept separate from competition submission)
+tools/Track-4-Toolkit/

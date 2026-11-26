@@ -1,0 +1,44 @@
+{
+  "dataset": "tools/Track-4-Toolkit/practice",
+  "note": "Practice/synthetic labelled dataset; does not establish production accuracy.",
+  "ingest": {
+    "ingested_count": 22,
+    "out_of_order_count": 1,
+    "order_uncertain_count": 0,
+    "reorder_window_ms": 5000,
+    "clock_uncertainty_ms": 500,
+    "ingestion_latency_ms": 60.086
+  },
+  "alerts_count": 3,
+  "rule_ids": [
+    "RULE_LATERAL_MULTI_HOP",
+    "RULE_PRIV_SELF_ESCALATION",
+    "RULE_PRIV_SENSITIVE_AFTER_CHANGE"
+  ],
+  "metrics": {
+    "status": "EVALUATED",
+    "dataset_version": "practice-v1",
+    "seed": null,
+    "tp": 5,
+    "fp": 0,
+    "tn": 17,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "false_alerts_per_1000_benign": 0.0,
+    "median_time_to_alert_ms": 100.0,
+    "p95_time_to_alert_ms": 200.0,
+    "per_rule_breakdown": {
+      "RULE_PRIV_SELF_ESCALATION": 1,
+      "RULE_PRIV_SENSITIVE_AFTER_CHANGE": 1,
+      "RULE_LATERAL_MULTI_HOP": 1
+    },
+    "confusion_matrix": {
+      "tp": 5,
+      "fp": 0,
+      "tn": 17,
+      "fn": 0
+    }
+  }
+}

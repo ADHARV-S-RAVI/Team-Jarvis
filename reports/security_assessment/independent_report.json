@@ -1,0 +1,104 @@
+{
+  "generated_at": "2026-11-26T16:38:40.329930+00:00",
+  "total_checks": 12,
+  "passed": 11,
+  "failed": 1,
+  "checks": [
+    {
+      "id": "IND-01",
+      "section": "Authorization & IDOR",
+      "attack_or_input": "Bob reads Alice's vault resource",
+      "expected": "HTTP 403, zero plaintext",
+      "observed": "Bob denied reading Alice's vault resource (403, zero content leakage)",
+      "status": "PASS"
+    },
+    {
+      "id": "IND-02",
+      "section": "Authorization & IDOR",
+      "attack_or_input": "Alice uses Bob's session",
+      "expected": "Policy DENY",
+      "observed": "Mismatched actor/session denied by policy engine",
+      "status": "PASS"
+    },
+    {
+      "id": "IND-03",
+      "section": "Authorization & IDOR",
+      "attack_or_input": "Alice uses Bob's device",
+      "expected": "Policy DENY",
+      "observed": "Wrong device denied by policy engine",
+      "status": "PASS"
+    },
+    {
+      "id": "IND-04",
+      "section": "Authorization & IDOR",
+      "attack_or_input": "Auditor attempts actor:revoke",
+      "expected": "Policy DENY",
+      "observed": "Auditor role denied actor:revoke",
+      "status": "PASS"
+    },
+    {
+      "id": "IND-05",
+      "section": "Authorization & IDOR",
+      "attack_or_input": "Access disabled resource",
+      "expected": "Policy DENY",
+      "observed": "Disabled resource denied",
+      "status": "PASS"
+    },
+    {
+      "id": "IND-06",
+      "section": "Authorization & IDOR",
+      "attack_or_input": "Access by disabled actor",
+      "expected": "Policy DENY",
+      "observed": "Disabled/revoked actor denied",
+      "status": "PASS"
+    },
+    {
+      "id": "IND-07",
+      "section": "Cryptographic Verification",
+      "attack_or_input": "AES-GCM tamper, wrong key, AAD mismatch, 20 nonces, HMAC",
+      "expected": "InvalidTag on tamper/mismatch; 20 unique nonces",
+      "observed": "AES-GCM tamper/wrong-key/AAD-mismatch rejected; 20/20 unique nonces; HMAC verified",
+      "status": "PASS"
+    },
+    {
+      "id": "IND-08",
+      "section": "Cryptographic Verification",
+      "attack_or_input": "ML-KEM-768 track4_service.py contract",
+      "expected": "ready=true",
+      "observed": "track4_service.py ML-KEM-768 adapter setup/contract verified",
+      "status": "PASS"
+    },
+    {
+      "id": "IND-09",
+      "section": "File Integrity Verification",
+      "attack_or_input": "Baseline init, scan, governed update, post-update scan",
+      "expected": "Persisted scans & approved baseline",
+      "observed": "{\"error\":\"invalid_request\",\"message\":\"Request validation failed\",\"correlation_id\":\"ddc76226-d236-4383-9fba-48c7399ab43e\"}",
+      "status": "FAIL"
+    },
+    {
+      "id": "IND-10",
+      "section": "Audit & Recovery",
+      "attack_or_input": "Modify persisted audit event reason",
+      "expected": "Hash chain verification fails",
+      "observed": "Audit chain (23 events) detected reason modification",
+      "status": "PASS"
+    },
+    {
+      "id": "IND-11",
+      "section": "Audit & Recovery",
+      "attack_or_input": "Tampered backup manifest & invalid recovery journal",
+      "expected": "Rejected with integrity error",
+      "observed": "Tampered backup manifest and corrupted recovery journal both rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "IND-12",
+      "section": "Secret & Config Review",
+      "attack_or_input": "Inspect algorithms.py PRIVATE KEY string",
+      "expected": "Confirmed detection signature only",
+      "observed": "algorithms.py PEM header is a magic-byte upload detector signature, not a hardcoded secret",
+      "status": "PASS"
+    }
+  ]
+}

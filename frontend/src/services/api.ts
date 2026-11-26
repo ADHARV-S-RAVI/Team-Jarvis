@@ -4,8 +4,10 @@
  */
 
 export const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
-  "http://127.0.0.1:8000";
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ??
+  (typeof window !== "undefined" && window.location.port === "5173"
+    ? "http://127.0.0.1:8000"
+    : "");
 
 export class ApiError extends Error {
   status: number;

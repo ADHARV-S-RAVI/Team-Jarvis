@@ -1,202 +1,519 @@
-# Q-SHIELD — Quantum-Ready Trust & Revocation Control Plane
+# Q-SHIELD
+### Quantum-Ready Trust & Revocation Control Plane
 
 **Team:** Team Jarvis  
 **Competition:** Yugaantar DevForge  
-**Track:** Track 4 — Trust, but Verify  
+**Track:** Track 4 — Trust, but Verify
+
+<!-- PROJECT BANNER PLACEHOLDER -->
+<!-- Add your Q-SHIELD project banner at docs/assets/qshield-banner.png -->
+<p align="center">
+  <img src="docs/assets/qshield-banner.png" alt="Q-SHIELD Project Banner" width="100%">
+</p>
 
 ---
 
-## 1. Project Overview
+## 1. Overview
 
-Q-SHIELD addresses the gap between trust-state changes (lost devices, compromised keys, revoked actors) and enforcement across protected resources and nodes. It protects encrypted vault payloads, authenticated messages, and application integrity baselines using a 9-step fail-closed authorization pipeline, salted `scrypt` password authentication, AES-256-GCM envelope encryption, and ML-KEM-768 adapter interoperability. When a device or key is revoked, Q-SHIELD persists monotonic revocation tombstones, propagates state across simulated nodes, supports crash-safe journaled key rotation recovery, and records every decision in a SHA-256 hash-chained audit ledger paired with a deterministic, zero-ML lateral-movement detector. Q-SHIELD is an offline-first hackathon prototype and is not production-ready.
+Q-SHIELD is a security control plane designed to manage digital identity, access authorization, cryptographic protection and revocation across protected resources.
 
----
+It addresses a critical security problem: when an identity, device or cryptographic key becomes compromised, access must be revoked consistently, and the resulting security decisions must be verifiable.
 
-## 2. Key Capabilities
+The system combines fail-closed authorization, encrypted resource storage, post-quantum key encapsulation interoperability, device lifecycle management, distributed revocation simulation, crash-safe key rotation, tamper-evident auditing and deterministic threat detection.
 
-- **Identity and Access Control:** 9-step fail-closed policy evaluation (`backend/app/policy/authz.py`), salted `scrypt` password authentication with rate limiting (`backend/app/services/foundation_service.py`), and WebAuthn/FIDO2 identity assurance (`docs/IDENTITY_ASSURANCE.md`).
-- **Cryptography and Protected Resources:** AES-256-GCM AEAD vault with AAD binding (`backend/app/vault/service.py`), `pqcrypto` ML-KEM-768 adapter (`track4_service.py`), and HMAC-SHA-256 proofs (`docs/crypto_design.md`).
-- **Device Lifecycle and Revocation:** Device enrolment, suspension, terminal revocation, replacement enrolment, and lost-device containment receipts (`docs/DEVICE_SESSION_LIFECYCLE.md`).
-- **Key Management and Recovery:** 4-phase key rotation with zero-grace cutoff, 7-point crash-safe rotation journal recovery, and HMAC-verified backup manifests (`docs/CRASH_RECOVERY_BACKUPS.md`).
-- **Audit and Threat Detection:** Append-only SHA-256 hash-chained audit ledger (`docs/AUDIT_LEDGER_AND_RECEIPTS.md`) and deterministic rule-based lateral-movement detector (`docs/DETECTION_AND_LATERAL_MOVEMENT.md`).
-- **Secure Messaging:** AAD-bound AEAD messaging, durable replay ledger, loss/reordering recovery, and peer-bound session resumption (`docs/SECURE_MESSAGING.md`).
-- **File Integrity and Data Lab:** SHA-256 System File Integrity Monitoring (`docs/FILE_INTEGRITY_MONITORING.md`) and resumable chunked Data Verification Lab (`backend/app/datalab/`).
-- **Performance Measurement:** `perf_counter_ns` benchmark suite with `psutil` CPU/RAM telemetry (`docs/benchmark_methodology.md`).
+Q-SHIELD also provides secure messaging, file integrity monitoring and a web-based operator interface.
 
----
+The project is an offline-first hackathon prototype. Its simulated infrastructure and deployment limitations are documented explicitly.
 
-## 3. Architecture
+## 2. Key Features
+
+| Security Area | Implementation |
+|---|---|
+| Identity & Authentication | Salted Scrypt password hashing, session validation, rate limiting and WebAuthn/passkey support |
+| Access Control | Nine-step, fail-closed authorization pipeline with role and resource ownership checks |
+| Cryptographic Protection | AES-256-GCM authenticated encryption, HKDF-SHA-256 and HMAC-SHA-256 |
+| Post-Quantum Cryptography | ML-KEM-768 integration through the official Track 4 adapter |
+| Device Security | Device enrolment, suspension, revocation, replacement and lost-device containment |
+| Distributed Revocation | Persistent revocation tombstones, logical node propagation and acknowledgement tracking |
+| Key Management | Versioned keys, four-phase rotation, crash recovery and backup integrity verification |
+| Audit | Append-only SHA-256 hash-chained audit ledger |
+| Threat Detection | Deterministic rule-based detection with explainable alerts and no AI/ML dependencies |
+| Secure Messaging | Authenticated encryption, recipient binding, replay protection and session resumption |
+| File Integrity | SHA-256 application file monitoring and explicitly selected user-file verification |
+| Performance | Repeatable benchmarks for cryptographic operations, authorization, messaging and system overhead |
+
+All capabilities should be interpreted according to their documented implementation status and limitations.
+
+## 3. Application Preview
+
+<!-- DASHBOARD SCREENSHOT PLACEHOLDER -->
+<!-- Add the actual desktop dashboard screenshot at docs/assets/dashboard-overview.png -->
+
+![Q-SHIELD Dashboard](docs/assets/dashboard-overview.png)
+
+*Q-SHIELD operator dashboard — replace this placeholder with an actual application screenshot.*
+
+<!-- SECURITY INTEGRITY CENTER SCREENSHOT PLACEHOLDER -->
+<!-- Add the screenshot at docs/assets/security-integrity-center.png -->
+
+![Security Integrity Center](docs/assets/security-integrity-center.png)
+
+*Security Integrity Center — identity assurance and file integrity monitoring.*
+
+<!-- ADDITIONAL SCREENSHOTS PLACEHOLDER -->
+<!-- Suggested screenshots:
+     docs/assets/device-management.png
+     docs/assets/key-management.png
+     docs/assets/audit-ledger.png
+     docs/assets/threat-detection.png
+-->
+
+## 4. System Architecture
+
+Q-SHIELD follows a modular architecture with a React frontend, FastAPI backend, persistent database, cryptographic services and security monitoring components.
+
+```mermaid
+flowchart TD
+    User["Operator / Authorized User"]
+    UI["React + TypeScript Frontend"]
+    API["FastAPI Backend"]
+
+    AUTH["Authentication & Authorization"]
+    DEVICE["Device & Session Management"]
+    VAULT["Protected Vault"]
+    CRYPTO["Cryptographic Provider"]
+    KEYS["Key Management & Rotation"]
+    MSG["Secure Messaging"]
+    INTEGRITY["File Integrity Monitoring"]
+    AUDIT["Audit Ledger"]
+    DETECTOR["Threat Detection"]
+    NODES["Simulated Logical Nodes"]
+    DB[("SQLite Database")]
+
+    User --> UI
+    UI --> API
+
+    API --> AUTH
+    AUTH --> DEVICE
+    AUTH --> VAULT
+
+    VAULT --> CRYPTO
+    VAULT --> KEYS
+    API --> MSG
+    API --> INTEGRITY
+
+    API --> AUDIT
+    AUDIT --> DETECTOR
+
+    DEVICE --> NODES
+    KEYS --> NODES
+
+    AUTH --> DB
+    DEVICE --> DB
+    VAULT --> DB
+    KEYS --> DB
+    MSG --> DB
+    INTEGRITY --> DB
+    AUDIT --> DB
+
+    CRYPTO --> DB
+```
+
+### Track 4 Adapter Architecture
+
+The official Track 4 adapter operates separately from the web application.
 
 ```mermaid
 flowchart LR
-  UI["React + Vite Console (frontend/)"] --> API["FastAPI Control Plane (backend/app/api/v1/)"]
-  API --> Auth["AuthN / 9-Step AuthZ (policy/authz.py)"]
-  Auth --> Services["Security Services (keys, devices, vault, messaging, integrity, datalab)"]
-  Services --> DB["SQLite + Alembic (0001-0010)"]
-  Services --> Crypto["Crypto Provider (AES-256-GCM / HKDF / ML-KEM-768)"]
-  Services --> Audit["SHA-256 Hash-Chained Audit Ledger"]
-  Services --> Detector["Deterministic Detector (Zero ML)"]
-  Services --> Nodes["Simulated Logical Nodes (sim-node-1..7, in-process)"]
+    Validator["Official Track 4 Validator"]
+    Adapter["track4_service.py"]
+    State["Persistent Adapter State"]
+    KEM["ML-KEM-768"]
+    Proof["HMAC-SHA-256 Proof"]
 
-  Toolkit["Track 4 Validator (tools/Track-4-Toolkit/)"] -->|stdin/stdout JSON| Adapter["Root Adapter (track4_service.py)"]
-  Adapter --> Crypto
+    Validator -->|"JSON over stdin/stdout"| Adapter
+    Adapter --> State
+    Adapter --> KEM
+    Adapter --> Proof
 ```
 
-**Simulated vs. Real Components:** `sim-node-1..7` are local SQLite-backed logical nodes simulating propagation delay and partitions in-process. Authorization, AEAD encryption, salted `scrypt` hashing, audit hash-chaining, FIM hashing, and `track4_service.py` execute real operations.
+### Infrastructure Classification
 
----
+The following distinctions are important:
 
-## 4. Repository Structure
+- **Real operations:** Authentication, authorization, AES-GCM encryption, hashing, HMAC verification, audit-chain computation and file hashing execute actual operations.
+- **Sandbox simulation:** Logical nodes simulate distributed revocation propagation, acknowledgement and connectivity conditions within the local environment.
+- **Development infrastructure:** SQLite and the local filesystem-based key store are used instead of a distributed database or hardware security module.
+
+Detailed architecture: [System Architecture](docs/architecture.md)
+
+## 5. Repository Structure
 
 ```text
 Team-Jarvis/
+│
 ├── README.md
 ├── .gitignore
 ├── .env.example
-├── requirements.txt              # Pinned Python 3.12 dependencies
-├── track4_service.py             # Official Track 4 root adapter
-├── threat-model.json             # Adapter threat-model metadata
+├── requirements.txt
+├── track4_service.py
+├── threat-model.json
+│
 ├── backend/
-│   ├── alembic/                  # Migrations 0001 through 0010
-│   ├── app/                      # FastAPI services, crypto, policy, audit, detector, FIM, datalab
-│   └── tests/                    # Backend pytest suite (53 tests)
+│   ├── app/
+│   │   ├── api/
+│   │   ├── audit/
+│   │   ├── backups/
+│   │   ├── crypto/
+│   │   ├── detector/
+│   │   ├── devices/
+│   │   ├── identity_assurance/
+│   │   ├── integrity/
+│   │   ├── keys/
+│   │   ├── messaging/
+│   │   ├── nodes/
+│   │   ├── policy/
+│   │   ├── recovery/
+│   │   └── vault/
+│   ├── alembic/
+│   └── tests/
+│
 ├── frontend/
-│   ├── src/                      # React + TypeScript + Vite operator console
-│   ├── package.json              # Node dependencies and scripts
+│   ├── src/
+│   ├── public/
+│   ├── package.json
 │   └── package-lock.json
-├── tests/adapter/                # Track 4 adapter black-box tests (9 tests)
-├── scripts/                      # Benchmark, Playwright E2E, and security assessment scripts
-├── docs/                         # Architecture, threat model, compliance, evaluation mapping
-├── reports/                      # Test reports, security assessments, benchmarks, brief PDF
-└── tools/Track-4-Toolkit/        # Local Track 4 toolkit (gitignored from submission)
+│
+├── tests/
+│   └── adapter/
+│
+├── scripts/
+│   ├── benchmark.py
+│   ├── run_security_assessment.py
+│   └── verify_frontend_playwright.py
+│
+├── docs/
+│   ├── architecture.md
+│   ├── security_design.md
+│   ├── threat_model.md
+│   ├── api_reference.md
+│   ├── evaluation_mapping.md
+│   ├── requirement_traceability.csv
+│   ├── benchmark_methodology.md
+│   ├── limitations.md
+│   └── demo_script.md
+│
+├── reports/
+│   ├── test_report/
+│   ├── security_assessment/
+│   ├── benchmarks/
+│   ├── detector/
+│   ├── evidence/
+│   └── submission/
+│
+└── tools/
+    └── Track-4-Toolkit/
 ```
 
----
+*The structure above highlights the main project components. Refer to the actual repository for the complete directory tree.*
 
-## 5. Technology Stack
+## 6. Technology Stack
 
-- **Backend:** Python `3.12`, FastAPI `0.165.0`, SQLAlchemy `2.1.9`, Alembic `1.20.1`, SQLite, Uvicorn `0.54.0`, Pydantic `2.14.4`
-- **Cryptography & Identity:** `cryptography==50.0.2` (AES-256-GCM, HKDF, HMAC-SHA-256), `pqcrypto==0.4.0` (ML-KEM-768), `webauthn==3.0.1`, `cbor2==6.3.0`, `pyOpenSSL==26.4.0`
-- **Frontend:** React `18.3.1`, TypeScript `5.6.3`, Vite `6.0.3`, Tailwind CSS `3.4.16`, TanStack Query `5.62.0`, Recharts `2.14.1`, Three.js `0.187.0`
-- **Testing & Telemetry:** `pytest==9.2.0`, `httpx==0.28.1`, `vitest==2.1.8`, `playwright==1.65.2`, `psutil==7.2.2`
+### Backend
 
----
+- Python 3.12
+- FastAPI
+- SQLAlchemy
+- Alembic
+- SQLite
+- Pydantic
+- Uvicorn
 
-## 6. Installation
+### Cryptography and Identity
+
+- `cryptography` — AES-256-GCM, HKDF and HMAC-SHA-256
+- `pqcrypto` — ML-KEM-768
+- `webauthn` — WebAuthn authentication
+- `cbor2` — CBOR support
+
+### Frontend
+
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- TanStack Query
+- Recharts
+
+### Testing and Performance
+
+- pytest
+- HTTPX
+- Vitest
+- Playwright
+- psutil
+- Python `perf_counter_ns`
+
+Exact dependency versions are maintained in the project dependency files.
+
+## 7. Installation and Setup
+
+### Prerequisites
+
+- Python 3.12
+- Node.js and npm
+- Git
+
+### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/ADHARV-S-RAVI/Team-Jarvis.git
+cd Team-Jarvis
+```
+
+### Step 2: Create a Python virtual environment
+
+**Windows PowerShell**
 
 ```powershell
-# 1. Create and activate Python 3.12 virtual environment
 py -3.12 -m venv .venv
 .venv\Scripts\Activate.ps1
+```
 
-# 2. Install pinned Python dependencies
-pip install -r requirements.txt
+**Linux / macOS**
 
-# 3. Apply database migrations (creates local SQLite DB)
-py -3.12 -m alembic -c backend/alembic.ini upgrade head
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+```
 
-# 4. Install frontend dependencies
+### Step 3: Install backend dependencies
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+### Step 4: Configure environment variables
+
+Use `.env.example` as the configuration reference.
+
+Create a local `.env` file if required by the application.
+
+Never commit actual secrets, private keys or local master keys.
+
+### Step 5: Apply database migrations
+
+```bash
+python -m alembic -c backend/alembic.ini upgrade head
+```
+
+### Step 6: Install frontend dependencies
+
+```bash
 cd frontend
 npm ci
 cd ..
 ```
 
-*(On Linux/macOS, replace `py -3.12` with `python3.12` and `.venv\Scripts\Activate.ps1` with `source .venv/bin/activate`.)*
+## 8. Running Q-SHIELD
 
----
+Start the backend and frontend in separate terminals.
 
-## 7. Running the Application
+### Backend
 
-```powershell
-# Terminal 1 — Backend API (http://127.0.0.1:8000, docs at /docs)
-py -3.12 -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+From the repository root:
 
-# Terminal 2 — Frontend Console (http://127.0.0.1:5173)
+```bash
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+```
+
+Backend API:
+
+`http://127.0.0.1:8000`
+
+Interactive API documentation:
+
+`http://127.0.0.1:8000/docs`
+
+### Frontend
+
+From the repository root:
+
+```bash
 cd frontend
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
----
+Frontend application:
 
-## 8. Running Tests
+`http://127.0.0.1:5173`
 
-```powershell
-# Backend tests (53 tests)
-py -3.12 -m pytest backend/tests/ -v
+## 9. Testing and Verification
 
-# Track 4 adapter tests (9 tests)
-py -3.12 -m pytest tests/adapter/test_track4_service.py -v
+Q-SHIELD includes backend tests, adapter tests, frontend tests, browser verification and security assessment scripts.
 
-# Official Track 4 validator (run from toolkit directory)
+Run the commands from the repository root unless otherwise specified.
+
+### Backend Tests
+
+```bash
+python -m pytest backend/tests/ -v
+```
+
+### Track 4 Adapter Tests
+
+```bash
+python -m pytest tests/adapter/test_track4_service.py -v
+```
+
+### Official Track 4 Validator
+
+From the toolkit directory:
+
+```bash
 cd tools/Track-4-Toolkit
-py -3.12 validate.py --entry "../../track4_service.py"
+python validate.py --entry "../../track4_service.py"
 cd ../..
+```
 
-# Frontend unit tests and production build
+### Frontend Tests
+
+```bash
 cd frontend
 npm run test
 npm run build
 cd ..
-
-# Automated security assessment & independent verification
-py -3.12 scripts/run_security_assessment.py
-py -3.12 scripts/run_independent_verification.py
-
-# Deterministic perf_counter_ns benchmarks
-py -3.12 scripts/benchmark.py
 ```
 
----
+### Security Assessment
 
-## 9. Hackathon Evaluation Mapping
+```bash
+python scripts/run_security_assessment.py
+```
 
-| Criterion (Points) | Implementation | Evidence | Verification Command |
-|---|---|---|---|
-| **Security Correctness (25)** | `backend/app/policy/authz.py`, `crypto/provider.py`, `foundation_service.py` | [independent_summary.md](reports/security_assessment/independent_summary.md) | `py -3.12 -m pytest backend/tests/ -v` |
-| **Live / Automated Security Assessment (25)** | `scripts/run_security_assessment.py`, `scripts/run_independent_verification.py` | [summary.md](reports/security_assessment/summary.md) | `py -3.12 scripts/run_security_assessment.py` |
-| **Functionality & Reliability (20)** | `recovery/service.py`, `backups/service.py`, `datalab/`, `alembic/` | [crash_matrix.md](reports/evidence/crash_matrix.md) | `py -3.12 -m alembic -c backend/alembic.ini upgrade head` |
-| **Threat Model & Honesty (10)** | `threat-model.json`, `ScorecardPage.tsx`, `REAL_IMPLEMENTATION_AUDIT.md` | [threat_model.md](docs/threat_model.md) | `py -3.12 tools/Track-4-Toolkit/validate.py --entry "../../track4_service.py"` |
-| **Performance & Overhead (10)** | `scripts/benchmark.py`, deterministic detector (`0` ML imports) | [summary.md](reports/benchmarks/summary.md) | `py -3.12 scripts/benchmark.py` |
-| **Usability & Documentation (10)** | `README.md`, `frontend/src/`, `demo_script.md`, Project Brief PDF | [QSHIELD_Project_Brief.pdf](reports/submission/QSHIELD_Project_Brief.pdf) | `cd frontend && npm run test && npm run build` |
+Run independent verification if the corresponding script is included in the repository:
 
-Full details: [docs/evaluation_mapping.md](docs/evaluation_mapping.md).
+```bash
+python scripts/run_independent_verification.py
+```
 
----
+### Browser Verification
 
-## 10. Security Design
+```bash
+python scripts/verify_frontend_playwright.py
+```
 
-- **Authentication:** Salted `scrypt` password hashing (`hmac.compare_digest`), login rate limiting (`5` failures / `60s`), and session revocation on password change (`backend/app/services/foundation_service.py`).
-- **Authorization:** 9-step fail-closed policy evaluation checking actor status, session binding, device trust, role permissions, resource status, and revocation tombstones (`backend/app/policy/authz.py`).
-- **Encryption & Key Management:** AES-256-GCM envelope encryption with AAD binding, `pqcrypto` ML-KEM-768 adapter encapsulation, 4-phase key rotation, and 7-point crash recovery (`docs/crypto_design.md`, `docs/CRASH_RECOVERY_BACKUPS.md`).
-- **Audit & Detection:** SHA-256 hash-chained audit ledger (`docs/AUDIT_LEDGER_AND_RECEIPTS.md`) and deterministic rule-based lateral-movement detector (`docs/DETECTION_AND_LATERAL_MOVEMENT.md`).
+### Performance Benchmarks
 
----
+```bash
+python scripts/benchmark.py
+```
 
-## 11. Evidence
+Test results and benchmark outputs are stored under `reports/`.
 
-- [Test Report Summary](reports/test_report/summary.md)
-- [Automated Security Assessment](reports/security_assessment/summary.md) & [Independent Security Verification](docs/INDEPENDENT_SECURITY_VERIFICATION.md)
-- [Benchmark Summary](reports/benchmarks/summary.md) & [Methodology](docs/benchmark_methodology.md)
-- [Threat Model](docs/threat_model.md) & [Toolkit Compliance](docs/TOOLKIT_COMPLIANCE.md)
-- [Two-Page Project Brief PDF](reports/submission/QSHIELD_Project_Brief.pdf)
+## 10. Hackathon Evaluation Mapping
+
+The following table maps Q-SHIELD to the six evaluation criteria.
+
+| Evaluation Criterion | Points | Relevant Implementation | Verification |
+|---|---:|---|---|
+| Security Correctness | 25 | Authentication, authorization, cryptographic provider, protected vault and key management | Backend security tests and adapter tests |
+| Live / Automated Security Assessment | 25 | Revocation enforcement, replay protection, integrity detection, audit verification and deterministic threat detection | Security assessment scripts and test evidence |
+| Functionality & Reliability | 20 | Normal operations, security controls, crash recovery, backup verification and persistent state | Backend tests, migration tests and recovery evidence |
+| Threat Model & Honesty | 10 | Threat model, security boundaries, trust assumptions and documented limitations | Threat model and implementation documentation |
+| Performance & Overhead | 10 | Cryptographic, authorization, messaging, audit and integrity benchmarks | Benchmark scripts and raw measurements |
+| Usability & Documentation | 10 | Operator interface, setup instructions, API documentation and reproducible tests | Frontend tests, production build and README |
+
+Detailed mapping:
+
+[Hackathon Evaluation Mapping](docs/evaluation_mapping.md)
+
+## 11. Security Design
+
+### Authentication and Authorization
+
+Q-SHIELD uses salted Scrypt password hashing, server-side session validation and a nine-step fail-closed authorization pipeline.
+
+WebAuthn provides cryptographic credential-based authentication. Local authenticators such as Windows Hello may perform biometric or PIN verification without exposing biometric data to the website.
+
+### Cryptographic Protection
+
+Protected resources use AES-256-GCM authenticated encryption with associated authenticated data.
+
+HKDF-SHA-256 provides purpose-separated key derivation. HMAC-SHA-256 is used for authenticated proofs and manifest integrity.
+
+The Track 4 adapter implements ML-KEM-768 interoperability.
+
+### Revocation and Key Management
+
+Revocation tombstones persist security-state changes. Logical nodes process propagation and acknowledge revocation state.
+
+Key rotation uses a four-phase workflow with durable recovery journals and backup verification.
+
+### Audit and Threat Detection
+
+Security events are recorded in a SHA-256 hash-chained audit ledger.
+
+A deterministic rule-based detector processes telemetry and generates explainable alerts without AI/ML dependencies.
+
+Further documentation:
+
+- [Security Design](docs/security_design.md)
+- [Threat Model](docs/threat_model.md)
+- [API Reference](docs/api_reference.md)
+- [Toolkit Compliance](docs/TOOLKIT_COMPLIANCE.md)
+
+## 12. Evidence and Reports
+
+The repository includes evidence supporting implementation and verification.
+
+| Evidence | Location |
+|---|---|
+| Backend and adapter test reports | `reports/test_report/` |
+| Security assessment | `reports/security_assessment/` |
+| Performance benchmarks | `reports/benchmarks/` |
+| Detector evaluation | `reports/detector/` |
+| Crash recovery evidence | `reports/evidence/` |
+| Project brief | `reports/submission/QSHIELD_Project_Brief.pdf` |
+
+Additional references:
+
+- [Acceptance Gates](docs/acceptance_gates.md)
+- [Requirement Traceability](docs/requirement_traceability.csv)
 - [Five-Minute Demo Script](docs/demo_script.md)
+- [Implementation Status](docs/implementation_status.md)
+
+## 13. Limitations and Security Disclosures
+
+Q-SHIELD is a hackathon prototype. The following limitations are explicit:
+
+1. **Simulated Nodes:** Logical nodes are SQLite-backed simulations, not physically distributed servers.
+2. **Database:** SQLite is used for local persistence; distributed database deployment is not implemented.
+3. **Key Storage:** The development key store uses local filesystem storage and is not an HSM.
+4. **Forward Secrecy:** NOT ESTABLISHED. The messaging implementation does not provide a per-message ephemeral ratchet.
+5. **ML-DSA:** NOT IMPLEMENTED.
+6. **WebAuthn Hardware Testing:** Automated tests use synthetic cryptographic fixtures. Live Windows Hello hardware verification has not been established by those tests.
+7. **Camera Demo:** The camera preview is non-authenticating. It does not establish identity.
+8. **File Integrity Scope:** Browser-based scanning only covers explicitly selected files. It does not provide silent OS-wide scanning or antivirus functionality.
+9. **Threat Detection:** Reported practice-dataset metrics demonstrate functional behavior on that dataset and must not be interpreted as production detection accuracy.
+
+See [Limitations](docs/limitations.md) for further details.
+
+## 14. License
+
+A license has not yet been specified in this repository.
+
+No license permissions should be assumed until an appropriate `LICENSE` file is added.
 
 ---
 
-## 12. Honest Limitations
+## Project Information
 
-- **Simulated Logical Nodes:** `sim-node-1..7` run in-process on SQLite rather than across physical distributed hosts.
-- **Local SQLite & Dev Key Store:** Single-host SQLite WAL database and filesystem `KeyMaterialStore` (not a hardware HSM).
-- **Forward Secrecy:** `NOT ESTABLISHED` (no per-message ephemeral DH/KEM ratchet).
-- **ML-DSA Signatures:** `NOT IMPLEMENTED` (integrity uses HMAC-SHA-256 and SHA-256 chains).
-- **WebAuthn & Camera Demo:** Automated WebAuthn tests use synthetic P-256 fixtures; the camera preview is non-authenticating and never uploads frames or stores biometric templates.
-- **File Integrity Monitoring:** Browser-selected file hashing covers user-chosen files only, not OS-wide antivirus scanning.
-- **Detector Evaluation:** Metrics are measured on the synthetic practice dataset only.
+**Project:** Q-SHIELD — Quantum-Ready Trust & Revocation Control Plane  
+**Team:** Team Jarvis  
+**Competition:** Yugaantar DevForge  
+**Track:** Track 4 — Trust, but Verify  
+**Repository:** https://github.com/ADHARV-S-RAVI/Team-Jarvis
 
-See [docs/limitations.md](docs/limitations.md) for full details.
-
----
-
-## 13. License
-
-No `LICENSE` file is currently present in the repository.
+**Official Track 4 Toolkit:**  
+https://github.com/ScalerOpenSourceLabs/Track-4-Toolkit

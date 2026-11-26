@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from backend.app.api.v1.rbac_auth_router import rbac_auth_router
 from backend.app.config import get_settings
 from backend.app.audit.service import (
     export_sanitized_audit,
@@ -1141,6 +1142,11 @@ def demo_login_endpoint(
     request: Request,
     db: Session = Depends(get_db),
 ) -> SessionCreatedResponse:
+    if not get_settings().enable_dev_demo_auth:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Demo authentication bypass is disabled",
+        )
     session, raw_token = create_session(
         db,
         actor_id=payload.actor_id,
@@ -1202,3 +1208,4 @@ from backend.app.api.v1.security_integrity_router import security_integrity_rout
 
 router.include_router(datalab_router)
 router.include_router(security_integrity_router)
+router.include_router(rbac_auth_router)

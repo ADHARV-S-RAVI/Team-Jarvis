@@ -15,7 +15,11 @@ from backend.app.db.session import create_db_engine, get_db
 from backend.app.main import create_app
 
 
-def test_password_auth_security_controls(tmp_path: Path) -> None:
+def test_password_auth_security_controls(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("QSHIELD_ENABLE_DEV_DEMO_AUTH", "true")
+    from backend.app.config import get_settings
+
+    get_settings.cache_clear()
     db_file = tmp_path / "password_auth_sec.db"
     db_url = f"sqlite:///{db_file.as_posix()}"
 

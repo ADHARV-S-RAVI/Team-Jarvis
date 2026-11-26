@@ -41,7 +41,9 @@ class Actor(Base):
     display_label: Mapped[str] = mapped_column(String(128), nullable=False)
     role: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    email: Mapped[str | None] = mapped_column(String(128), nullable=True, unique=True, index=True, default=None)
     password_hash: Mapped[str | None] = mapped_column(String(256), nullable=True, default=None)
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow)
 
     devices: Mapped[list[Device]] = relationship(back_populates="owner", cascade="all, delete-orphan")
@@ -98,9 +100,28 @@ class AuthSession(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    session_secret_hash: Mapped[str | None] = mapped_column(String(128), nullable=True, default=None)
+    identity_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    verification_method: Mapped[str | None] = mapped_column(String(32), nullable=True, default=None)
 
     actor: Mapped[Actor] = relationship(back_populates="sessions")
     device: Mapped[Device] = relationship(back_populates="sessions")
+
+
+class ProtectedFile(Base):
+    """Role-scoped and actor-assigned protected file for RBAC file access."""
+
+    __tablename__ = "protected_files"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    classification: Mapped[str] = mapped_column(String(32), nullable=False)
+    required_role: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    assigned_actor_id: Mapped[str | None] = mapped_column(
+        String(64), ForeignKey("actors.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    content_text: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow)
 
 
 class KeyMetadata(Base):

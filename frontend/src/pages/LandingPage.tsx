@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { StatusBadge } from "../components/ui";
 import { useTheme } from "../app/ThemeContext";
+import AeroShards from "./AeroShards";
 import DitherVeil from "./DitherVeil";
 
 export function LandingPage() {
@@ -38,20 +39,55 @@ export function LandingPage() {
             <span>{isDark ? "Light" : "Dark"}</span>
           </button>
           <Link to="/login" className="text-xs font-mono text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
-            Demo Login
+            Sign In
           </Link>
           <Link
-            to="/overview"
+            to="/auth"
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-xs font-medium text-white shadow-sm"
           >
-            Open Console <ArrowRight className="w-3.5 h-3.5" />
+            Role Auth Portal <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </header>
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 space-y-14">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 space-y-14 relative">
+        {/* AeroShards Interactive Background */}
+        <div
+          style={{ width: "100%", height: "600px", position: "absolute", top: 0, left: 0, zIndex: 0 }}
+          className="pointer-events-none overflow-hidden rounded-xl"
+        >
+          <div style={{ width: "100%", height: "600px", position: "relative" }}>
+            <AeroShards
+              shardColor="#896ABD"
+              accentColor="#A855F7"
+              placement="full"
+              material="glass"
+              markers="plus"
+              count={1300}
+              depthOfField={0.75}
+              vignette={0.3}
+              mouseInteraction
+              pulseOnClick
+              holdToGather
+              lightMode={false}
+              shardSize={1}
+              spread={1}
+              twist={1}
+              billow={1}
+              speed={1}
+              scale={1}
+              glow={0.35}
+              grain={0.06}
+              intro
+              mouseStrength={0.6}
+              parallax={0.5}
+              paused={false}
+            />
+          </div>
+        </div>
+
         {/* Hero Section with DitherVeil */}
-        <section className="grid lg:grid-cols-12 gap-8 items-center">
+        <section className="grid lg:grid-cols-12 gap-8 items-center relative z-10">
           <div className="lg:col-span-6 space-y-5">
             <div className="flex flex-wrap gap-2">
               <StatusBadge label="PROOF-CARRYING TRUST CHANGES" tone="violet" />
@@ -71,13 +107,13 @@ export function LandingPage() {
                 to="/login"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-sm font-medium text-white shadow-sm"
               >
-                Launch Synthetic Demo <ArrowRight className="w-4 h-4" />
+                Sign In to Console <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                to="/scenarios"
+                to="/auth"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-slate-100 dark:bg-[#141b22] hover:bg-slate-200 dark:hover:bg-[#1c242d] text-sm font-medium text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-[#26313d]"
               >
-                Run 14 Verification Scenarios
+                Role-Based Verification
               </Link>
             </div>
           </div>
@@ -108,34 +144,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* Spline 3D Interactive Viewer */}
-        <section className="rounded-xl border border-slate-200 dark:border-[#1c242d] bg-slate-50 dark:bg-[#0d1218] p-5 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
-                Interactive 3D Security Topology Viewer (Spline)
-              </h2>
-              <p className="text-xs text-slate-500">
-                Embedded Spline 3D scene slot (`url=&quot;not-exported-yet&quot;` — ready for exported `.splinecode` URL).
-              </p>
-            </div>
-            <StatusBadge label="SPLINE 3D VIEWER" tone="info" />
-          </div>
-          <div className="w-full h-[320px] rounded-lg overflow-hidden border border-slate-200 dark:border-[#1c242d] bg-slate-950/90 flex items-center justify-center relative">
-            <spline-viewer url="not-exported-yet" style={{ width: "100%", height: "100%" }} />
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center px-6 bg-gradient-to-b from-slate-950/30 via-transparent to-slate-950/70">
-              <div className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-[11px] font-mono text-emerald-300 mb-2">
-                &lt;spline-viewer url=&quot;not-exported-yet&quot;&gt; mounted
-              </div>
-              <p className="text-xs text-slate-300 max-w-md">
-                Spline 2.0.223 runtime loaded. Replace <code className="text-emerald-300">not-exported-yet</code> with your exported <code className="text-cyan-300">.splinecode</code> URL to render your custom 3D scene here.
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* Verified Track 4 Metrics Strip */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
           <div className="p-4 rounded-lg border border-slate-200 dark:border-[#1c242d] bg-slate-50 dark:bg-[#0d1218]">
             <div className="text-[11px] font-mono text-slate-500">SECURITY ASSESSMENT</div>
             <div className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1">18 / 18 PASS</div>

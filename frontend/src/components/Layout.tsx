@@ -32,6 +32,7 @@ import { StatusBadge, useToast } from "./ui";
 
 const NAV_ITEMS = [
   { to: "/overview", label: "Dashboard", icon: Activity },
+  { to: "/auth", label: "Role Auth", icon: Lock },
   { to: "/identities", label: "Identities", icon: Users },
   { to: "/devices", label: "Devices", icon: Laptop },
   { to: "/vault", label: "Vault", icon: Lock },
@@ -210,9 +211,9 @@ export function ConsoleLayout() {
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/30 border border-emerald-200 dark:border-emerald-500/40 text-xs font-semibold text-emerald-700 dark:text-emerald-300"
             >
               <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold uppercase">
-                {(session?.actorId ?? "DL").slice(0, 2)}
+                {(session?.actorId ?? "SI").slice(0, 2)}
               </span>
-              <span className="hidden sm:inline">{session ? session.actorId : "Demo Login"}</span>
+              <span className="hidden sm:inline">{session ? session.actorId : "Sign In"}</span>
             </NavLink>
           </div>
         </header>

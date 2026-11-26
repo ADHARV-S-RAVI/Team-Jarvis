@@ -19,6 +19,7 @@ def stage10_client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     db_file = tmp_path / "stage10_test.db"
     db_url = f"sqlite:///{db_file}"
     monkeypatch.setenv("QSHIELD_KEY_STORE_DIR", str(tmp_path / "keys"))
+    monkeypatch.setenv("QSHIELD_ENABLE_DEV_DEMO_AUTH", "true")
 
     from backend.app.config import get_settings
 

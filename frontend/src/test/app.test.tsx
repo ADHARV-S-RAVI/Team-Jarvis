@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { cleanup, render, screen, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "../app/AuthContext";
@@ -26,6 +26,26 @@ describe("Q-SHIELD Stage 10 Frontend", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string) => {
+        if (url.includes("/auth/session-status")) {
+          return new Response(
+            JSON.stringify({
+              valid: true,
+              session_id: "sess-test",
+              actor_id: "adm_test",
+              display_label: "Admin Test",
+              email: "admin@qshield.local",
+              role: "Admin",
+              device_id: "dev-adm",
+              issued_at: "2026-11-27T00:00:00Z",
+              expires_at: "2026-11-27T01:00:00Z",
+              seconds_remaining: 3600,
+              identity_verified: true,
+              verification_method: "PASSWORD",
+              session_secret_bound: true,
+            }),
+            { status: 200 }
+          );
+        }
         if (url.includes("/health")) {
           return new Response(JSON.stringify({ status: "ok", app: "Q-SHIELD", version: "0.2.0", database: "ok" }), { status: 200 });
         }
@@ -62,9 +82,9 @@ describe("Q-SHIELD Stage 10 Frontend", () => {
     expect(screen.getByText(/FS: NOT ESTABLISHED/i)).toBeInTheDocument();
   });
 
-  it("renders 14 scenarios on Attack Simulation page", () => {
+  it("renders 14 scenarios on Attack Simulation page", async () => {
     renderAt("/scenarios");
-    expect(screen.getByText(/S01 — Normal Protected Read/i)).toBeInTheDocument();
+    expect(await screen.findByText(/S01 — Normal Protected Read/i)).toBeInTheDocument();
     expect(screen.getByText(/S14 — Node Convergence Check/i)).toBeInTheDocument();
   });
 
@@ -103,5 +123,35 @@ describe("Q-SHIELD Stage 10 Frontend", () => {
     expect(btn).not.toBeDisabled();
     fireEvent.click(btn);
     expect(onConfirm).toHaveBeenCalledWith("Stolen laptop");
+  });
+
+  it("renders Role-Based Authentication Portal and blocks unauthenticated role dashboard access", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("/auth/session-status")) {
+          return new Response(JSON.stringify({ detail: "Missing session credentials" }), { status: 401 });
+        }
+        return new Response(JSON.stringify({ status: "ok" }), { status: 200 });
+      })
+    );
+    renderAt("/auth");
+    expect(await screen.findByText(/Role-Based Authentication & Identity Verification/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Demo Login/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/Username or Email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "User" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Employee" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Admin" })).toBeInTheDocument();
+
+    // Unauthenticated access to /dashboard/admin redirects to /login
+    cleanup();
+    renderAt("/dashboard/admin");
+    expect(await screen.findByText(/Sign In with Assigned Account Role/i)).toBeInTheDocument();
+
+    // Access-denied screen renders clearly
+    cleanup();
+    renderAt("/access-denied");
+    expect(await screen.findByText(/Access Denied \(403\)/i)).toBeInTheDocument();
   });
 });

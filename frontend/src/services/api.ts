@@ -20,9 +20,19 @@ export class ApiError extends Error {
   }
 }
 
+function authHeaders(sessionId?: string, sessionToken?: string): Record<string, string> | undefined {
+  if (!sessionId) return undefined;
+  const h: Record<string, string> = { "X-Session-Id": sessionId };
+  if (sessionToken) {
+    h.Authorization = `Bearer ${sessionToken}`;
+  }
+  return h;
+}
+
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers ?? {}),
@@ -41,8 +51,10 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     const obj = (data ?? {}) as Record<string, unknown>;
-    const detail = obj.detail as Record<string, unknown> | undefined;
+    const detailStr = typeof obj.detail === "string" ? obj.detail : undefined;
+    const detail = typeof obj.detail === "object" && obj.detail !== null ? (obj.detail as Record<string, unknown>) : undefined;
     const msg =
+      detailStr ||
       (detail?.reason_code as string | undefined) ||
       (obj.message as string | undefined) ||
       `HTTP ${res.status}`;
@@ -88,7 +100,7 @@ export interface SessionInfo {
   version: number;
 }
 
-export interface DemoLoginResponse extends SessionInfo {
+export interface SessionCreatedResponse extends SessionInfo {
   session_token: string;
 }
 
@@ -197,8 +209,8 @@ export const api = {
       "/api/v1/simulation/reset",
       { method: "POST" }
     ),
-  demoLogin: (body: { actor_id: string; device_id: string; peer_id: string }) =>
-    requestJson<DemoLoginResponse>("/api/v1/auth/demo-login", {
+  createSession: (body: { actor_id: string; device_id: string; peer_id: string }) =>
+    requestJson<SessionCreatedResponse>("/api/v1/sessions", {
       method: "POST",
       body: JSON.stringify(body),
     }),
@@ -622,4 +634,143 @@ export const api = {
     ),
   securityIntegrityEvents: () =>
     requestJson<{ event_id: string; sequence: number; timestamp: string; actor_id: string; action: string; target: string; decision: string; reason: string }[]>("/api/v1/security-integrity/events"),
+
+  // Advanced RBAC Auth & Protected Files
+  registerUser: (body: { actor_id: string; display_label: string; email: string; password: string; confirm_password: string }) =>
+    requestJson<{
+      actor_id: string;
+      display_label: string;
+      email: string;
+      role: string;
+      status: string;
+      session_id: string;
+      session_token: string;
+      device_id: string;
+      peer_id: string;
+      issued_at: string;
+      expires_at: string;
+      session_secret_bound: boolean;
+    }>("/api/v1/auth/register", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  passkeyLoginOptions: (identifier: string, rp_id: string) =>
+    requestJson<{ challenge_id: string; expires_at: string; options: Record<string, unknown> }>(
+      "/api/v1/auth/passkey-login/options",
+      { method: "POST", body: JSON.stringify({ identifier, rp_id }) }
+    ),
+  passkeyLoginVerify: (body: {
+    identifier: string;
+    challenge_id: string;
+    credential: Record<string, unknown>;
+    rp_id: string;
+    origin: string;
+  }) =>
+    requestJson<{
+      session_id: string;
+      session_token: string;
+      actor_id: string;
+      display_label: string;
+      email: string | null;
+      role: string;
+      device_id: string;
+      peer_id: string;
+      issued_at: string;
+      expires_at: string;
+      session_secret_bound: boolean;
+      identity_verified: boolean;
+      verification_method: string | null;
+    }>("/api/v1/auth/passkey-login/verify", { method: "POST", body: JSON.stringify(body) }),
+  roleLogin: (body: { identifier: string; password: string; expected_role: "User" | "Employee" | "Admin"; device_id?: string }) =>
+    requestJson<{
+      session_id: string;
+      session_token: string;
+      actor_id: string;
+      display_label: string;
+      email: string | null;
+      role: string;
+      device_id: string;
+      peer_id: string;
+      issued_at: string;
+      expires_at: string;
+      session_secret_bound: boolean;
+      identity_verified: boolean;
+      verification_method: string | null;
+    }>("/api/v1/auth/role-login", { method: "POST", body: JSON.stringify(body) }),
+  getSessionStatus: (sessionId?: string, sessionToken?: string) =>
+    requestJson<{
+      valid: boolean;
+      session_id: string;
+      actor_id: string;
+      display_label: string;
+      email: string | null;
+      role: string;
+      device_id: string;
+      issued_at: string;
+      expires_at: string;
+      seconds_remaining: number;
+      identity_verified: boolean;
+      verification_method: string | null;
+      session_secret_bound: boolean;
+    }>("/api/v1/auth/session-status", {
+      headers: authHeaders(sessionId, sessionToken),
+    }),
+  cameraCheckpoint: (sessionId: string, sessionToken: string, body: { consent_granted: boolean; action: "COMPLETED" | "CANCELLED" | "DENIED" }) =>
+    requestJson<{ camera_preview_completed: boolean; face_recognition: string; actor_id: string }>("/api/v1/auth/camera-checkpoint", {
+      method: "POST",
+      headers: authHeaders(sessionId, sessionToken),
+      body: JSON.stringify(body),
+    }),
+  listProtectedFiles: (sessionId: string, sessionToken: string) =>
+    requestJson<{ id: string; name: string; classification: string; required_role: string; assigned_actor_id: string | null; created_at: string }[]>(
+      "/api/v1/files",
+      { headers: authHeaders(sessionId, sessionToken) }
+    ),
+  downloadProtectedFile: (sessionId: string, sessionToken: string, fileId: string) =>
+    requestJson<{ id: string; name: string; classification: string; required_role: string; content_text: string }>(
+      `/api/v1/files/${encodeURIComponent(fileId)}/download`,
+      { headers: authHeaders(sessionId, sessionToken) }
+    ),
+  createProtectedFile: (
+    sessionId: string,
+    sessionToken: string,
+    body: { name: string; classification: string; required_role: "User" | "Employee" | "Admin"; assigned_actor_id?: string | null; content_text: string }
+  ) =>
+    requestJson<{ id: string; name: string; required_role: string }>("/api/v1/files", {
+      method: "POST",
+      headers: authHeaders(sessionId, sessionToken),
+      body: JSON.stringify(body),
+    }),
+  adminListUsers: (sessionId: string, sessionToken: string) =>
+    requestJson<{ id: string; display_label: string; email: string | null; role: string; enabled: boolean; locked: boolean; created_at: string }[]>(
+      "/api/v1/admin/users",
+      { headers: authHeaders(sessionId, sessionToken) }
+    ),
+  adminCreateUser: (
+    sessionId: string,
+    sessionToken: string,
+    body: { actor_id: string; display_label: string; email: string; role: "User" | "Employee" | "Admin"; password: string; device_id: string }
+  ) =>
+    requestJson<{ id: string; role: string; email: string }>("/api/v1/admin/users", {
+      method: "POST",
+      headers: authHeaders(sessionId, sessionToken),
+      body: JSON.stringify(body),
+    }),
+  adminUpdateRole: (sessionId: string, sessionToken: string, actorId: string, role: "User" | "Employee" | "Admin") =>
+    requestJson<{ id: string; role: string }>(`/api/v1/admin/users/${encodeURIComponent(actorId)}/role`, {
+      method: "POST",
+      headers: authHeaders(sessionId, sessionToken),
+      body: JSON.stringify({ role }),
+    }),
+  adminUpdateStatus: (sessionId: string, sessionToken: string, actorId: string, enabled: boolean) =>
+    requestJson<{ id: string; enabled: boolean }>(`/api/v1/admin/users/${encodeURIComponent(actorId)}/status`, {
+      method: "POST",
+      headers: authHeaders(sessionId, sessionToken),
+      body: JSON.stringify({ enabled }),
+    }),
+  adminAuditEvents: (sessionId: string, sessionToken: string) =>
+    requestJson<{ seq: number; actor_id: string; action: string; target: string; decision: string; reason: string; timestamp: string }[]>(
+      "/api/v1/admin/audit",
+      { headers: authHeaders(sessionId, sessionToken) }
+    ),
 };

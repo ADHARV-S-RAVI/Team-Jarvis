@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     app_name: str = "Q-SHIELD Control Plane"
     app_version: str = "0.2.0"
     environment: str = "local"
+    enable_dev_demo_auth: bool = False
     database_url: str = "sqlite:///./qshield.db"
     log_level: str = "INFO"
     session_ttl_seconds: int = 3600

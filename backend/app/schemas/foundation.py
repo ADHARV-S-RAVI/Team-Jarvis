@@ -24,7 +24,7 @@ class ErrorResponse(BaseModel):
 class IdentityCreate(BaseModel):
     id: str = Field(min_length=1, max_length=64)
     display_label: str = Field(min_length=1, max_length=128)
-    role: Literal["Owner/User", "Security Operator", "Admin", "Auditor"]
+    role: Literal["Owner/User", "Security Operator", "Admin", "Auditor", "User", "Employee"]
     enabled: bool = True
 
 

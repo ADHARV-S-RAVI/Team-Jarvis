@@ -514,6 +514,21 @@ def revoke_or_remove_credential(
     acting = db.get(Actor, actor_id)
     if acting is None or (cred.actor_id != actor_id and acting.role not in {"Security Operator", "Admin"}):
         raise DomainPermissionError("Not authorized to manage this credential")
+    # Prevent user from removing their only valid authentication method
+    if cred.actor_id == actor_id and acting.role not in {"Security Operator", "Admin"}:
+        other_active = (
+            db.execute(
+                select(IdentityCredential).where(
+                    IdentityCredential.actor_id == cred.actor_id,
+                    IdentityCredential.id != cred.id,
+                    IdentityCredential.credential_status == "ACTIVE",
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if acting.password_hash is None and len(other_active) == 0:
+            raise DomainValidationError("Cannot remove the only valid authentication method without a password or recovery setup")
 
     now = datetime.now(timezone.utc)
     if delete_record:

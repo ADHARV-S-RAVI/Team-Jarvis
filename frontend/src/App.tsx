@@ -5,9 +5,9 @@ import { ThemeProvider } from "./app/ThemeContext";
 import { ConsoleLayout } from "./components/Layout";
 import { ToastProvider } from "./components/ui";
 import { AuditPage } from "./pages/AuditPage";
+import { AuthPortalPage } from "./pages/AuthPortalPage";
 import { BenchmarksPage } from "./pages/BenchmarksPage";
 import { DataLabPage } from "./pages/DataLabPage";
-import { DemoLoginPage } from "./pages/DemoLoginPage";
 import { DetectorPage } from "./pages/DetectorPage";
 import { DevicesPage } from "./pages/DevicesPage";
 import { IdentityAccessPage } from "./pages/IdentityAccessPage";
@@ -17,6 +17,14 @@ import { LandingPage } from "./pages/LandingPage";
 import { MessagingPage } from "./pages/MessagingPage";
 import { NodesPage } from "./pages/NodesPage";
 import { OverviewPage } from "./pages/OverviewPage";
+import {
+  AccessDeniedPage,
+  AdminDashboardPage,
+  EmployeeDashboardPage,
+  RequireAuth,
+  RequireRole,
+  UserDashboardPage,
+} from "./pages/RoleDashboards";
 import { ScenariosPage } from "./pages/ScenariosPage";
 import { ScorecardPage } from "./pages/ScorecardPage";
 import { SecurityIntegrityPage } from "./pages/SecurityIntegrityPage";
@@ -37,23 +45,49 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route element={<ConsoleLayout />}>
-        <Route path="/login" element={<DemoLoginPage />} />
-        <Route path="/overview" element={<OverviewPage />} />
-        <Route path="/identities" element={<IdentityAccessPage />} />
-        <Route path="/devices" element={<DevicesPage />} />
-        <Route path="/vault" element={<VaultPage />} />
-        <Route path="/keys" element={<KeysPage />} />
-        <Route path="/nodes" element={<NodesPage />} />
-        <Route path="/incidents" element={<IncidentsPage />} />
-        <Route path="/detector" element={<DetectorPage />} />
-        <Route path="/messaging" element={<MessagingPage />} />
-        <Route path="/audit" element={<AuditPage />} />
-        <Route path="/datalab" element={<DataLabPage />} />
-        <Route path="/security-integrity" element={<SecurityIntegrityPage />} />
-        <Route path="/benchmarks" element={<BenchmarksPage />} />
-        <Route path="/scenarios" element={<ScenariosPage />} />
-        <Route path="/scorecard" element={<ScorecardPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/login" element={<AuthPortalPage />} />
+        <Route path="/auth" element={<AuthPortalPage />} />
+        <Route path="/access-denied" element={<AccessDeniedPage />} />
+        <Route
+          path="/dashboard/user"
+          element={
+            <RequireRole allowedRoles={["User", "Employee", "Admin"]}>
+              <UserDashboardPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/dashboard/employee"
+          element={
+            <RequireRole allowedRoles={["Employee", "Admin"]}>
+              <EmployeeDashboardPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/dashboard/admin"
+          element={
+            <RequireRole allowedRoles={["Admin"]}>
+              <AdminDashboardPage />
+            </RequireRole>
+          }
+        />
+        <Route path="/overview" element={<RequireAuth><OverviewPage /></RequireAuth>} />
+        <Route path="/identities" element={<RequireAuth><IdentityAccessPage /></RequireAuth>} />
+        <Route path="/devices" element={<RequireAuth><DevicesPage /></RequireAuth>} />
+        <Route path="/vault" element={<RequireAuth><VaultPage /></RequireAuth>} />
+        <Route path="/keys" element={<RequireAuth><KeysPage /></RequireAuth>} />
+        <Route path="/nodes" element={<RequireAuth><NodesPage /></RequireAuth>} />
+        <Route path="/incidents" element={<RequireAuth><IncidentsPage /></RequireAuth>} />
+        <Route path="/detector" element={<RequireAuth><DetectorPage /></RequireAuth>} />
+        <Route path="/messaging" element={<RequireAuth><MessagingPage /></RequireAuth>} />
+        <Route path="/audit" element={<RequireAuth><AuditPage /></RequireAuth>} />
+        <Route path="/datalab" element={<RequireAuth><DataLabPage /></RequireAuth>} />
+        <Route path="/security-integrity" element={<RequireAuth><SecurityIntegrityPage /></RequireAuth>} />
+        <Route path="/benchmarks" element={<RequireAuth><BenchmarksPage /></RequireAuth>} />
+        <Route path="/scenarios" element={<RequireAuth><ScenariosPage /></RequireAuth>} />
+        <Route path="/scorecard" element={<RequireAuth><ScorecardPage /></RequireAuth>} />
+        <Route path="/settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

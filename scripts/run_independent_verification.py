@@ -64,6 +64,7 @@ def run_independent_verification() -> dict[str, object]:
         db_url = f"sqlite:///{db_path.as_posix()}"
         os.environ["QSHIELD_DATABASE_URL"] = db_url
         os.environ["QSHIELD_KEY_STORE_DIR"] = str(tmp_dir / "keystore")
+        os.environ["QSHIELD_ENABLE_DEV_DEMO_AUTH"] = "true"
 
         from backend.app.config import get_settings
         from backend.app.db.models import Actor, AuditEvent, AuthSession, Resource, RotationJournal

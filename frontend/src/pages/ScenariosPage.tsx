@@ -38,7 +38,7 @@ export function ScenariosPage() {
     try {
       await api.resetSimulation();
       if (s.id === "S01") {
-        const sA = await api.demoLogin({ actor_id: "alice", device_id: "dev-alice-01", peer_id: "vault" });
+        const sA = await api.createSession({ actor_id: "alice", device_id: "dev-alice-01", peer_id: "vault" });
         const ok = await api.readVault("vault-brief-alice", {
           actor_id: "alice",
           session_id: sA.id,
@@ -76,7 +76,7 @@ export function ScenariosPage() {
         const alerts = await api.detectorRun([]);
         if (alerts.length === 0) throw new Error("Expected alerts");
       } else if (s.id === "S10" || s.id === "S11" || s.id === "S12") {
-        const sess = await api.demoLogin({ actor_id: "alice", device_id: "dev-alice-01", peer_id: "bob" });
+        const sess = await api.createSession({ actor_id: "alice", device_id: "dev-alice-01", peer_id: "bob" });
         const msg = await api.sendMessage({ sender_id: "alice", recipient_id: "bob", session_id: sess.id, plaintext: "SCENARIO_MSG" });
         await api.deliverMessage(msg.id, { recipient_id: "bob" });
         const sec = await api.messagingSecurityStatus();

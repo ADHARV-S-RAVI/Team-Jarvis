@@ -25,8 +25,10 @@ def _configure_sqlite_pragmas(dbapi_connection: Any, _connection_record: Any) ->
 
 
 def create_db_engine(database_url: str | None = None) -> Engine:
-    """Create a configured SQLAlchemy engine for SQLite."""
+    """Create a configured SQLAlchemy engine for SQLite or PostgreSQL."""
     url = database_url or get_settings().database_url
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://") :]
     connect_args: dict[str, Any] = {}
     if url.startswith("sqlite"):
         connect_args["check_same_thread"] = False
@@ -39,6 +41,13 @@ def create_db_engine(database_url: str | None = None) -> Engine:
 
 _engine = create_db_engine()
 SessionLocal = sessionmaker(bind=_engine, autoflush=False, autocommit=False, expire_on_commit=False)
+
+
+def ensure_database_schema(engine: Engine | None = None) -> None:
+    """Create missing database tables idempotently (essential for serverless cold starts)."""
+    from backend.app.db.models import Base
+
+    Base.metadata.create_all(bind=engine or _engine)
 
 
 def get_engine() -> Engine:

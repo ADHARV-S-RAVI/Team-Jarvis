@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 import logging
+import os
 import uuid
 
 from fastapi import FastAPI, Request, status
@@ -15,7 +16,7 @@ from backend.app.api.v1.router import router as v1_router
 from backend.app.config import get_settings
 from backend.app.crypto.provider import run_crypto_self_test
 from backend.app.datalab.worker import background_worker
-from backend.app.db.session import SessionLocal
+from backend.app.db.session import SessionLocal, ensure_database_schema
 from backend.app.devices.service import DomainPermissionError
 from backend.app.services.foundation_service import (
     DomainConflictError,
@@ -36,14 +37,17 @@ def create_app() -> FastAPI:
     settings = get_settings()
     _configure_logging(settings.log_level)
     run_crypto_self_test()
+    ensure_database_schema()
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
-        background_worker.start(SessionLocal)
+        if not os.getenv("VERCEL"):
+            background_worker.start(SessionLocal)
         try:
             yield
         finally:
-            background_worker.stop()
+            if not os.getenv("VERCEL"):
+                background_worker.stop()
 
     app = FastAPI(
         title=settings.app_name,
@@ -56,7 +60,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-        allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+        allow_origin_regex=r"^https?://((localhost|127\.0\.0\.1)(:\d+)?|([a-zA-Z0-9-]+\.)*vercel\.app)$",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -126,7 +130,12 @@ def create_app() -> FastAPI:
         )
 
     @app.exception_handler(Exception)
-    async def handle_unexpected(request: Request, _exc: Exception) -> JSONResponse:
+    async def handle_unexpected(request: Request, exc: Exception) -> JSONResponse:
+        logging.getLogger(__name__).exception(
+            "Unhandled internal error [%s]",
+            getattr(request.state, "correlation_id", "unknown"),
+            exc_info=exc,
+        )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={

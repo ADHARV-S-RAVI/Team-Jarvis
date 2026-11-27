@@ -3,182 +3,297 @@
 
 **Team Jarvis | Yugaantar DevForge | Track 4 — Trust, but Verify**
 
-Q-SHIELD is a security-focused prototype designed to demonstrate identity verification, role-based access control, device lifecycle management, cryptographic protection, revocation propagation and tamper-evident auditing in a distributed environment.
+Q-SHIELD is a security control plane designed to strengthen digital trust through identity assurance, cryptographic protection, device lifecycle management, policy enforcement, threat detection, and verifiable audit trails.
 
-It provides a centralized trust and revocation control plane with a web dashboard for managing identities, devices, sessions, security events and protected resources.
-
----
-
-## Project Preview
-
-<!-- IMAGE 1: Replace with the Q-SHIELD main dashboard screenshot -->
-<p align="center">
-  <img src="docs/assets/qshield-dashboard.png" alt="Q-SHIELD Dashboard" width="90%">
-</p>
-
-<!-- IMAGE 2: Replace with the authentication and identity verification screenshot -->
-<p align="center">
-  <img src="docs/assets/qshield-authentication.png" alt="Q-SHIELD Authentication" width="90%">
-</p>
-
-<!-- IMAGE 3: Replace with the security integrity and audit screenshot -->
-<p align="center">
-  <img src="docs/assets/qshield-security.png" alt="Q-SHIELD Security and Audit Center" width="90%">
-</p>
+It brings multiple security capabilities into one platform, helping administrators monitor trust relationships, manage access, respond to security events, and maintain an auditable record of critical operations.
 
 ---
 
-## Key Capabilities
+## Platform Preview
 
-| Capability | Description |
+<p align="center">
+  <img src="docs/assets/qshield-dashboard.png" width="85%" alt="Q-SHIELD Security Dashboard">
+  <br><em>Central Security Dashboard</em>
+</p>
+
+<p align="center">
+  <img src="docs/assets/qshield-authentication.png" width="85%" alt="Q-SHIELD Authentication Interface">
+  <br><em>Authentication and Identity Assurance</em>
+</p>
+
+<p align="center">
+  <img src="docs/assets/qshield-security.png" width="85%" alt="Q-SHIELD Security Monitoring">
+  <br><em>Security Monitoring and Trust Management</em>
+</p>
+
+---
+
+## Core Capabilities
+
+| Security Domain | Capabilities |
 |---|---|
-| Identity & Authentication | Password authentication, account provisioning and WebAuthn/passkey support. |
-| Role-Based Access Control | Separate User, Employee and Admin permissions, enforced by the backend. |
-| Device Lifecycle | Device registration, trust status and lost-device incident handling. |
-| Revocation Control | Revocation propagation across simulated distributed nodes. |
-| Cryptographic Protection | ML-KEM-768 integration, AES-256-GCM, HKDF-SHA-256 and HMAC-SHA-256. |
-| Key Lifecycle | Journaled key rotation, recovery and backup integrity verification. |
-| Tamper-Evident Audit | Hash-chained security event ledger. |
-| Security Analytics | Deterministic security-event detection and risk analysis. |
-| Secure Messaging | Message integrity and replay protection. |
-| File Protection | Role- and permission-based access to protected resources. |
-| Security Dashboard | Centralized visibility into identities, devices, sessions and security events. |
+| Identity & Access | Account registration, role-based authentication, session management and access enforcement |
+| Identity Assurance | WebAuthn/passkey authentication with cryptographic challenge verification |
+| Device Lifecycle | Device registration, trust status management, revocation and lifecycle tracking |
+| Cryptographic Protection | Password hashing, protected key handling and authenticated encryption |
+| Key Management | Key rotation workflows, rotation journal and recovery mechanisms |
+| Trust & Revocation | Centralized trust decisions and simulated node revocation |
+| Threat Detection | Deterministic security event analysis and risk classification |
+| Secure Messaging | Message integrity, authentication and replay protection |
+| Audit & Compliance | Hash-chained audit records and verifiable event history |
+| Security Dashboard | Centralized visibility into platform activity and security status |
 
-## Authentication & Identity Verification
-
-Q-SHIELD uses backend-verified authentication rather than demo login.
-
-- Passwords are protected using salted Scrypt hashing.
-- User registration and account provisioning are supported.
-- User, Employee and Admin roles are enforced through backend RBAC.
-- HTTP-only session cookies support authenticated sessions.
-- Session expiration, revocation and logout invalidation are implemented.
-- WebAuthn/passkey authentication is integrated.
-- Compatible platform authenticators may use Windows Hello for local user verification.
-
-**Biometric privacy:** Windows Hello performs biometric verification locally. Q-SHIELD does not receive Windows Hello facial data or biometric templates.
-
-**Camera status:** Camera preview is available with explicit permission. Custom facial biometric matching is not implemented. Camera preview must not be treated as proof of identity.
-
-Real Windows Hello hardware verification remains subject to device-level testing.
-
-## Security Architecture
-
-Q-SHIELD follows a layered security architecture:
-
-1. **Identity Layer:** Account authentication and identity verification.
-2. **Authorization Layer:** Backend-enforced role and resource permissions.
-3. **Device Trust Layer:** Device lifecycle and trust-state management.
-4. **Cryptographic Layer:** Encryption, key derivation and integrity protection.
-5. **Revocation Layer:** Trust revocation and simulated node propagation.
-6. **Audit Layer:** Hash-chained security event records.
-7. **Detection Layer:** Deterministic analysis of security events.
-
-### Cryptographic Components
-
-| Component | Implementation |
-|---|---|
-| Post-quantum key encapsulation | ML-KEM-768 |
-| Symmetric encryption | AES-256-GCM |
-| Key derivation | HKDF-SHA-256 |
-| Message authentication | HMAC-SHA-256 |
-| Password hashing | Scrypt |
-| Authentication | WebAuthn / Passkeys |
-| Audit integrity | Hash-chained ledger |
-
-Cryptographic operations use established libraries rather than custom cryptographic primitives.
+---
 
 ## System Architecture
 
-```text
-             Q-SHIELD Web Application
-                       |
-                React + TypeScript
-                       |
-                  FastAPI Backend
-                       |
-          Authentication & RBAC Layer
-                       |
-       +---------------+---------------+
-       |               |               |
-   Identity        Device &        Security
-   Management      Revocation      Services
-       |               |               |
-       +---------------+---------------+
-                       |
-             Cryptographic Services
-                       |
-              Audit & Detection
-                       |
-             Database / Storage
-                       |
-             Simulated Trust Nodes
+Q-SHIELD follows a layered architecture that separates user interaction, identity enforcement, security orchestration, cryptographic operations, persistence, and auditability.
+
+This separation helps keep security-sensitive operations within dedicated backend services instead of relying on frontend controls.
+
+```mermaid
+flowchart TB
+
+    subgraph CLIENT["1. CLIENT & PRESENTATION LAYER"]
+        UI["React + TypeScript Dashboard"]
+        AUTH_UI["Authentication Portal"]
+        ADMIN_UI["Administrative Console"]
+        MON_UI["Security Monitoring Interface"]
+    end
+
+    subgraph EDGE["2. API & ACCESS CONTROL LAYER"]
+        API["FastAPI Application"]
+        ROUTER["Versioned API Routers"]
+        SESSION["Session Validation"]
+        RBAC["Role-Based Access Control"]
+        POLICY["Authorization Enforcement"]
+    end
+
+    subgraph IDENTITY["3. IDENTITY & TRUST LAYER"]
+        REG["Account Registration"]
+        LOGIN["Credential Verification"]
+        PASSKEY["WebAuthn / Passkey Verification"]
+        DEVICE["Device Lifecycle Service"]
+        TRUST["Trust & Revocation Service"]
+    end
+
+    subgraph SECURITY["4. SECURITY ORCHESTRATION LAYER"]
+        KEY["Key Management & Rotation"]
+        MSG["Secure Messaging"]
+        DETECT["Threat Detection Engine"]
+        INCIDENT["Security Event Processing"]
+        RECOVERY["Rotation & Recovery Workflows"]
+    end
+
+    subgraph CRYPTO["5. CRYPTOGRAPHIC SERVICES LAYER"]
+        SCRYPT["Scrypt Password Hashing"]
+        KEM["Post-Quantum Key Encapsulation Integration"]
+        AES["AES-256-GCM"]
+        HKDF["HKDF-SHA-256"]
+        HMAC["HMAC-SHA-256"]
+        WEBAUTHN["WebAuthn Challenge & Signature Validation"]
+    end
+
+    subgraph DATA["6. DATA & EVIDENCE LAYER"]
+        DB[("SQLAlchemy Persistence")]
+        VAULT["Protected Key Storage"]
+        JOURNAL["Key Rotation Journal"]
+        LEDGER["Hash-Chained Audit Ledger"]
+        EVENTS["Security Event Records"]
+    end
+
+    subgraph NODES["7. TRUSTED ENVIRONMENT SIMULATION"]
+        NODE1["Simulated Node A"]
+        NODE2["Simulated Node B"]
+        NODE3["Simulated Node C"]
+        REVOKE["Revocation Propagation"]
+    end
+
+    UI --> API
+    AUTH_UI --> API
+    ADMIN_UI --> API
+    MON_UI --> API
+
+    API --> ROUTER
+    ROUTER --> SESSION
+    SESSION --> RBAC
+    RBAC --> POLICY
+
+    POLICY --> IDENTITY
+    IDENTITY --> SECURITY
+
+    REG --> SCRYPT
+    LOGIN --> SCRYPT
+    PASSKEY --> WEBAUTHN
+
+    DEVICE --> DB
+    TRUST --> DB
+    TRUST --> NODES
+
+    KEY --> CRYPTO
+    MSG --> AES
+    MSG --> HKDF
+    MSG --> HMAC
+    DETECT --> INCIDENT
+    RECOVERY --> JOURNAL
+
+    SECURITY --> DATA
+    CRYPTO --> VAULT
+    INCIDENT --> LEDGER
+    TRUST --> LEDGER
+    KEY --> LEDGER
+    MSG --> LEDGER
+
+    NODES --> REVOKE
+    REVOKE --> TRUST
 ```
+
+### Architectural Layers
+
+**1. Client & Presentation Layer**
+
+Provides the interactive security dashboard, authentication portal, administrative console, and monitoring views. The frontend communicates with backend APIs and presents security state to authorized users.
+
+**2. API & Access Control Layer**
+
+Acts as the controlled entry point for platform operations. It handles request routing, session validation, role verification, and backend authorization.
+
+**3. Identity & Trust Layer**
+
+Manages account registration, authentication, passkey verification, device lifecycle operations, and trust decisions. Identity and authorization checks are enforced by the backend.
+
+**4. Security Orchestration Layer**
+
+Coordinates key rotation, secure messaging, security event processing, threat detection, and recovery workflows. It connects individual security services into complete operational processes.
+
+**5. Cryptographic Services Layer**
+
+Provides the cryptographic primitives and verification mechanisms used by the platform, including password hashing, authenticated encryption, key derivation, message authentication, and WebAuthn verification.
+
+**6. Data & Evidence Layer**
+
+Maintains application records, protected key material, rotation history, security events, and hash-chained audit records. It provides the persistence and evidence foundation for security operations.
+
+**7. Trusted Environment Simulation**
+
+Represents distributed nodes participating in trust and revocation workflows. It allows the prototype to demonstrate trust-state changes and revocation behavior in a controlled environment.
+
+### Important Security Boundaries
+
+- The frontend is not treated as a trusted authorization authority.
+- Authentication and role enforcement take place on the backend.
+- Session secrets are not stored as plaintext in the session database.
+- Passkey assertions are verified by the backend.
+- Security-sensitive operations generate auditable records.
+- Device and node trust states are managed through backend services.
+
+---
+
+## Authentication & Identity Assurance
+
+Q-SHIELD combines conventional account authentication with modern cryptographic identity assurance.
+
+- Passwords are protected using salted Scrypt hashing.
+- Role-based access is enforced by backend authorization checks.
+- Sessions use random secrets, HTTP-only cookies, and server-side revocation.
+- WebAuthn supports passkey-based cryptographic authentication.
+- Supported platform authenticators, including Windows Hello, can provide local user verification.
+
+**Privacy-conscious camera handling:** The camera preview is a separate consent-based interface. It does not perform facial recognition or establish identity. Passkey verification is the identity-assurance mechanism.
+
+---
+
+## Cryptographic Foundation
+
+| Component | Purpose |
+|---|---|
+| ML-KEM-768 | Post-quantum key encapsulation capability |
+| AES-256-GCM | Authenticated encryption |
+| HKDF-SHA-256 | Cryptographic key derivation |
+| HMAC-SHA-256 | Message authentication and integrity |
+| Scrypt | Password hashing |
+| WebAuthn | Public-key-based authentication |
+| Hash-Chained Ledger | Tamper-evident audit history |
+
+Cryptographic components are used for distinct security responsibilities rather than treating a single algorithm as a complete security solution.
+
+---
 
 ## Technology Stack
 
-**Backend:** Python 3.12, FastAPI, SQLAlchemy, Alembic, Pydantic.
+| Layer | Technologies |
+|---|---|
+| Frontend | React, TypeScript, Vite, Tailwind CSS |
+| Backend | Python 3.12, FastAPI, Pydantic |
+| Database | SQLAlchemy, SQLite |
+| Migrations | Alembic |
+| Authentication | Scrypt, WebAuthn |
+| Cryptography | AES-GCM, HKDF, HMAC and ML-KEM integration |
+| Testing | Pytest, HTTPX, Vitest, Playwright |
+| Performance | psutil and benchmark utilities |
 
-**Frontend:** React, TypeScript, Vite, Tailwind CSS.
-
-**Security:** Scrypt, ML-KEM-768, AES-256-GCM, HKDF, HMAC, WebAuthn.
-
-**Database:** SQLite with SQLAlchemy and Alembic migrations.
-
-**Testing:** Pytest, HTTPX, Vitest, Playwright and the official Track 4 validator.
+---
 
 ## Repository Structure
 
 ```text
-Q-SHIELD/
+Team-Jarvis/
+│
 ├── backend/
 │   ├── app/
 │   │   ├── api/
+│   │   ├── core/
+│   │   ├── models/
 │   │   ├── services/
-│   │   ├── models.py
 │   │   └── main.py
 │   ├── migrations/
 │   └── tests/
+│
 ├── frontend/
-│   └── src/
-│       ├── app/
-│       ├── components/
-│       ├── pages/
-│       └── services/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   └── hooks/
+│   └── package.json
+│
+├── scripts/
 ├── docs/
 │   └── assets/
-├── scripts/
-├── tests/
+│
 ├── tools/
+│   └── Track-4-Toolkit/
+│
 ├── track4_service.py
 ├── requirements.txt
 └── README.md
 ```
 
-## Setup & Execution
+*The final repository tree should reflect the actual committed files.*
 
-### 1. Clone the repository
+---
 
-```bash
-git clone https://github.com/ADHARV-S-RAVI/Team-Jarvis.git
-cd Team-Jarvis
-```
+## Getting Started
 
-### 2. Backend setup
+### Prerequisites
+
+- Python 3.12
+- Node.js 22 or compatible version
+- npm
+
+### Backend Setup
 
 ```bash
 py -3.12 -m venv .venv
 ```
 
-Activate the virtual environment and install dependencies:
+Activate the environment and install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Configure the required environment variables using the project's environment example.
-
-Run database migrations:
+Apply database migrations:
 
 ```bash
 py -3.12 -m alembic -c backend/alembic.ini upgrade head
@@ -190,7 +305,7 @@ Start the backend:
 python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
 ```
 
-### 3. Frontend setup
+### Frontend Setup
 
 ```bash
 cd frontend
@@ -198,70 +313,75 @@ npm ci
 npm run dev
 ```
 
-Application endpoints:
+### Application Access
 
-- Frontend: `http://127.0.0.1:5173`
-- Backend: `http://127.0.0.1:8000`
-
-Refer to the project configuration for environment-specific settings.
-
-## Testing & Verification
-
-The following results were reported by the development verification runs:
-
-| Test Suite | Result |
-|---|---:|
-| Backend tests | 54 passed |
-| Adapter tests | 9 passed |
-| Frontend tests | 7 passed |
-| Frontend production build | Passed |
-| Official Track 4 validator | 21/21 passed |
-| Real-authentication Playwright E2E | Passed |
-
-The reported authentication E2E workflow covers registration, login, invalid credentials, session persistence, role restrictions and logout.
-
-Run the official validator from the toolkit directory:
-
-```bash
-py -3.12 validate.py --entry "../../track4_service.py"
-```
-
-Run backend tests:
-
-```bash
-py -3.12 -m pytest backend/tests/ -q
-```
-
-Run frontend tests and build:
-
-```bash
-cd frontend
-npm run test
-npm run build
-```
-
-Test counts should be updated whenever the test suite changes.
-
-## Track 4 Evaluation Alignment
-
-| Evaluation Area | Q-SHIELD Evidence |
+| Service | Address |
 |---|---|
-| Security Correctness | Authentication, RBAC, cryptographic protection, revocation and integrity controls. |
-| Live Security Assessment | Security assessment scripts, authorization tests and negative authentication scenarios. |
-| Functionality & Reliability | Device lifecycle, key rotation, recovery, protected resources and automated tests. |
-| Threat Model & Honesty | Documented security architecture, implementation status and limitations. |
-| Performance & Overhead | Benchmarking scripts and measured operation results. |
-| Usability & Documentation | Role-specific dashboards, authentication interface, setup instructions and technical documentation. |
-
-
-
-## Team
-
-**Team Jarvis**  
-**Project:** Q-SHIELD — Quantum-Ready Trust & Revocation Control Plane  
-**Event:** Yugaantar DevForge  
-**Track:** Track 4 — Trust, but Verify
+| Frontend | `http://localhost:5173` |
+| Backend API | `http://127.0.0.1:8000` |
+| API Documentation | `http://127.0.0.1:8000/docs` |
 
 ---
 
-*Built as a security-focused prototype demonstrating identity, trust, revocation and cryptographic control mechanisms.*
+## Testing & Validation
+
+Q-SHIELD includes backend tests, adapter tests, frontend tests, browser-based authentication checks, and official Track 4 toolkit validation.
+
+| Validation Area | Reported Result |
+|---|---:|
+| Backend Tests | 54 passed |
+| Adapter Tests | 9 passed |
+| Frontend Tests | 7 passed |
+| Official Toolkit Validator | 21/21 checks |
+| Frontend Production Build | Passed |
+| Real Authentication Browser E2E | Passed |
+
+These results reflect the latest reported development test run. Final evaluation should be performed against the exact submitted commit and environment.
+
+---
+
+## Track 4 Evaluation Alignment
+
+| Evaluation Area | Q-SHIELD Implementation |
+|---|---|
+| Security Correctness | Authentication, RBAC, session controls, cryptographic services and revocation workflows |
+| Security Assessment | Automated tests, adapter validation and security-focused browser checks |
+| Functionality & Reliability | Integrated dashboard, backend services, persistence and lifecycle workflows |
+| Threat Model & Documentation | Layered architecture, trust boundaries, security responsibilities and implementation scope |
+| Performance & Overhead | Benchmarking utilities and performance measurements |
+| Usability & Documentation | Administrative dashboard, authentication interface, setup instructions and visual evidence |
+
+---
+
+## Implementation Scope & Future Evolution
+
+Q-SHIELD is an actively developed security prototype. Its architecture establishes a foundation for further deployment-oriented hardening and broader security integration.
+
+The current implementation provides a controlled environment for demonstrating identity assurance, access enforcement, cryptographic workflows, device trust, revocation, threat detection, and auditability.
+
+Further engineering can extend the platform through:
+
+- Production-grade hardware-backed key management and HSM integration.
+- Expanded post-quantum cryptographic coverage and migration workflows, including ML-DSA.
+- Formal forward-secrecy analysis and protocol validation.
+- Broader threat-detection datasets and evaluation against additional attack scenarios.
+- Real distributed infrastructure integration beyond simulated nodes.
+- Expanded biometric and identity-assurance research, with explicit consent and privacy safeguards.
+- Additional deployment, monitoring, and operational security controls.
+
+These areas represent the platform's next engineering milestones, rather than claims of capabilities that are not yet implemented.
+
+---
+
+## Project Information
+
+**Project:** Q-SHIELD  
+**Team:** Team Jarvis  
+**Event:** Yugaantar DevForge  
+**Track:** Track 4 — Trust, but Verify  
+
+**Repository:** https://github.com/ADHARV-S-RAVI/Team-Jarvis
+
+---
+
+*Q-SHIELD — Building verifiable trust through identity, cryptography, and security intelligence.*

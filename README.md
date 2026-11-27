@@ -12,20 +12,17 @@ It brings multiple security capabilities into one platform, helping administrato
 ## Platform Preview
 
 <p align="center">
-  <img src="<img width="1535" height="723" alt="image" src="https://github.com/user-attachments/assets/e8f61987-86f2-44e1-b03b-f608647a6b6f" />
-" width="85%" alt="Q-SHIELD Security Dashboard">
+  <img width="1535" height="723" alt="Screenshot 2026-11-27 085327" src="https://github.com/user-attachments/assets/990fa1d1-68fb-4a1a-9b73-1397a20c67aa" />
   <br><em>Central Security Dashboard</em>
 </p>
 
 <p align="center">
-  <img src="<img width="1535" height="723" alt="image" src="https://github.com/user-attachments/assets/3357c4c0-d8eb-4778-99bf-a27a344fc7b1" />
-" width="85%" alt="Q-SHIELD Authentication Interface">
+  <img width="1535" height="723" alt="Screenshot 2026-11-27 085425" src="https://github.com/user-attachments/assets/584e3176-0b4e-4cdc-a748-99847184bf3f" />
   <br><em>Authentication and Identity Assurance</em>
 </p>
 
 <p align="center">
-  <img src="<img width="1535" height="726" alt="image" src="https://github.com/user-attachments/assets/5b24f04e-15fa-41b0-b73e-859979dc450f" />
-" width="85%" alt="Q-SHIELD Security Monitoring">
+  <img width="1535" height="726" alt="image" src="https://github.com/user-attachments/assets/93d526ae-dbb3-4d8c-93af-d0a7a4df277d" />
   <br><em>Security Monitoring and Trust Management</em>
 </p>
 

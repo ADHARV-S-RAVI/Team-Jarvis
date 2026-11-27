@@ -1,201 +1,267 @@
-# Q-SHIELD — Quantum-Ready Trust & Revocation Control Plane
+# Q-SHIELD
+### Quantum-Ready Trust & Revocation Control Plane
 
-**Team:** Team Jarvis  
-**Competition:** Yugaantar DevForge — Track 4 (Trust, but Verify)  
+**Team Jarvis | Yugaantar DevForge | Track 4 — Trust, but Verify**
+
+Q-SHIELD is a security-focused prototype designed to demonstrate identity verification, role-based access control, device lifecycle management, cryptographic protection, revocation propagation and tamper-evident auditing in a distributed environment.
+
+It provides a centralized trust and revocation control plane with a web dashboard for managing identities, devices, sessions, security events and protected resources.
 
 ---
 
-## 1. Project Overview
+## Project Preview
 
-Q-SHIELD is an offline-first, CPU-first trust and revocation control plane designed to keep access decisions synchronized with real-time trust changes such as lost devices, compromised keys, and revoked accounts. It combines backend-enforced role-based access control (RBAC), salted `scrypt` password authentication, `HttpOnly` cookie sessions with 256-bit session secrets, WebAuthn / Windows Hello passkey support, AES-256-GCM envelope encryption, ML-KEM-768 adapter interoperability, a SHA-256 hash-chained audit ledger, and a deterministic, zero-ML threat detector. Q-SHIELD is a hackathon prototype and is not production-ready.
+<!-- IMAGE 1: Replace with the Q-SHIELD main dashboard screenshot -->
+<p align="center">
+  <img src="docs/assets/qshield-dashboard.png" alt="Q-SHIELD Dashboard" width="90%">
+</p>
 
-## 2. Problem Statement
+<!-- IMAGE 2: Replace with the authentication and identity verification screenshot -->
+<p align="center">
+  <img src="docs/assets/qshield-authentication.png" alt="Q-SHIELD Authentication" width="90%">
+</p>
 
-In distributed and zero-trust systems, credentials or devices can be lost, stolen, or compromised while existing sessions or cached permissions remain active. Static access checks fail to enforce immediate revocation across nodes, leaving protected files and administrative controls exposed. Q-SHIELD enforces fail-closed authorization at every protected boundary and records tamper-evident audit evidence for every decision.
+<!-- IMAGE 3: Replace with the security integrity and audit screenshot -->
+<p align="center">
+  <img src="docs/assets/qshield-security.png" alt="Q-SHIELD Security and Audit Center" width="90%">
+</p>
 
-## 3. Key Features
+---
 
-- **Real User Registration & Role-Based Login:** Public `User` registration with `scrypt` password hashing; backend-verified `User`, `Employee`, and `Admin` roles.
-- **Passkey / Windows Hello Authentication:** WebAuthn registration and assertion login (`webauthn==3.0.1`), challenge replay protection, and Passkey Management in Security Settings.
-- **Session Management & 256-Bit Secrets:** `HttpOnly`, `SameSite=lax` cookies, 256-bit `secrets.token_bytes(32)` session secrets (SHA-256 hashed server-side), expiration, revocation, and logout invalidation.
-- **9-Step Fail-Closed Vault & Crypto:** AES-256-GCM encrypted vault with AAD binding (`backend/app/vault/`) and `pqcrypto` ML-KEM-768 adapter (`track4_service.py`).
-- **Crash-Safe Key Rotation & Backups:** 7-point crash-injection rotation journal recovery and HMAC-verified backup manifests.
-- **Tamper-Evident Audit & Deterministic Detector:** Append-only SHA-256 hash-chained audit ledger and rule-based lateral-movement detector (zero AI/ML).
-- **System File Integrity Monitoring & Data Lab:** SHA-256 baseline integrity scanning (`backend/app/integrity/`) and chunked verification lab (`backend/app/datalab/`).
+## Key Capabilities
 
-## 4. Authentication and Identity Verification
-
-- **User Registration (`POST /api/v1/auth/register`):** Validates Full Name, Email, Username, Password (min 8 chars), and Confirm Password; rejects duplicate usernames/emails (`409`); hashes passwords with `hashlib.scrypt` + random 16-byte salt; assigns `User` role automatically; and issues an authenticated session. Public registration never creates `Employee` or `Admin` accounts.
-- **Password Authentication (`POST /api/v1/auth/role-login`):** Verifies username/email, `scrypt` password (`hmac.compare_digest`), account enabled state, lockout (`429` after 5 failures), and actual database role (`403` on role spoofing).
-- **WebAuthn / Windows Hello (`POST /api/v1/auth/passkey-login/options`, `/verify`, `/identity-assurance/register/*`):** Supports registering platform authenticators (`navigator.credentials.create()`) and signing in with Passkey / Windows Hello (`navigator.credentials.get()`). Biometric verification is handled locally by the OS/device; Q-SHIELD stores public keys only.
-- **Camera Preview vs. Facial Biometric Recognition:** Camera preview is strictly opt-in, shows a `CAMERA ACTIVE` indicator, provides `Stop Camera`, releases all `MediaStreamTrack`s on stop/logout, and never uploads frames or stores biometric templates. Facial biometric matching is **NOT IMPLEMENTED**.
-
-| Feature | Status |
+| Capability | Description |
 |---|---|
-| Password authentication | IMPLEMENTED |
-| User registration | IMPLEMENTED |
-| Role-based access control | IMPLEMENTED |
-| Session management | IMPLEMENTED |
-| Session revocation | IMPLEMENTED |
-| WebAuthn/passkey backend | IMPLEMENTED |
-| Synthetic WebAuthn tests | IMPLEMENTED |
-| Real Windows Hello hardware testing | NOT VERIFIED |
-| Camera preview | IMPLEMENTED |
-| Facial biometric matching | NOT IMPLEMENTED |
+| Identity & Authentication | Password authentication, account provisioning and WebAuthn/passkey support. |
+| Role-Based Access Control | Separate User, Employee and Admin permissions, enforced by the backend. |
+| Device Lifecycle | Device registration, trust status and lost-device incident handling. |
+| Revocation Control | Revocation propagation across simulated distributed nodes. |
+| Cryptographic Protection | ML-KEM-768 integration, AES-256-GCM, HKDF-SHA-256 and HMAC-SHA-256. |
+| Key Lifecycle | Journaled key rotation, recovery and backup integrity verification. |
+| Tamper-Evident Audit | Hash-chained security event ledger. |
+| Security Analytics | Deterministic security-event detection and risk analysis. |
+| Secure Messaging | Message integrity and replay protection. |
+| File Protection | Role- and permission-based access to protected resources. |
+| Security Dashboard | Centralized visibility into identities, devices, sessions and security events. |
 
-## 5. Role-Based Access Control
+## Authentication & Identity Verification
 
-| Role | Dashboard Route | Backend-Enforced Permissions |
-|---|---|---|
-| **User** | `/dashboard/user` | View own session status, download `User` files assigned to their account, manage own passkeys. |
-| **Employee** | `/dashboard/employee` | Access employee dashboard, download `Employee`/`User` operational files; denied `Admin` files and admin APIs (`403`). |
-| **Admin** | `/dashboard/admin` | Provision User/Employee/Admin accounts, assign/revoke roles, enable/disable accounts, manage protected files, inspect audit logs. |
+Q-SHIELD uses backend-verified authentication rather than demo login.
 
-All permissions are enforced on the backend via `require_any_role` and `require_admin_role` in `backend/app/api/v1/rbac_auth_router.py`.
+- Passwords are protected using salted Scrypt hashing.
+- User registration and account provisioning are supported.
+- User, Employee and Admin roles are enforced through backend RBAC.
+- HTTP-only session cookies support authenticated sessions.
+- Session expiration, revocation and logout invalidation are implemented.
+- WebAuthn/passkey authentication is integrated.
+- Compatible platform authenticators may use Windows Hello for local user verification.
 
-## 6. Security Architecture
+**Biometric privacy:** Windows Hello performs biometric verification locally. Q-SHIELD does not receive Windows Hello facial data or biometric templates.
 
-- **Authorization:** 9-step fail-closed policy evaluation (`backend/app/policy/authz.py`) + RBAC role/ownership dependencies.
-- **Cryptography:** `cryptography==50.0.2` (AES-256-GCM, HKDF, HMAC-SHA-256) and `pqcrypto==0.4.0` (ML-KEM-768).
-- **Auditability:** Sequential SHA-256 hash-chained `audit_events` ledger (`backend/app/audit/service.py`).
+**Camera status:** Camera preview is available with explicit permission. Custom facial biometric matching is not implemented. Camera preview must not be treated as proof of identity.
 
-See [docs/SECURITY_ARCHITECTURE.md](docs/SECURITY_ARCHITECTURE.md) and [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md).
+Real Windows Hello hardware verification remains subject to device-level testing.
 
-## 7. System Architecture
+## Security Architecture
 
-```mermaid
-flowchart LR
-  UI["React + Vite Console (frontend/)"] -->|credentials: include| API["FastAPI Backend (backend/app/api/v1/)"]
-  API --> Auth["RBAC Auth & 9-Step AuthZ"]
-  Auth --> Services["Security Services (keys, devices, vault, files, integrity, detector)"]
-  Services --> DB["SQLite + Alembic (0001-0011)"]
-  Services --> Audit["SHA-256 Hash-Chained Audit Ledger"]
-  Toolkit["Track 4 Validator (tools/Track-4-Toolkit/)"] -->|stdin/stdout JSON| Adapter["track4_service.py"]
-```
+Q-SHIELD follows a layered security architecture:
 
-## 8. Technology Stack
+1. **Identity Layer:** Account authentication and identity verification.
+2. **Authorization Layer:** Backend-enforced role and resource permissions.
+3. **Device Trust Layer:** Device lifecycle and trust-state management.
+4. **Cryptographic Layer:** Encryption, key derivation and integrity protection.
+5. **Revocation Layer:** Trust revocation and simulated node propagation.
+6. **Audit Layer:** Hash-chained security event records.
+7. **Detection Layer:** Deterministic analysis of security events.
 
-- **Backend:** Python `3.12`, FastAPI `0.165.0`, SQLAlchemy `2.1.9`, Alembic `1.20.1`, SQLite, Uvicorn `0.54.0`
-- **Crypto & WebAuthn:** `cryptography==50.0.2`, `pqcrypto==0.4.0`, `webauthn==3.0.1`, `cbor2==6.3.0`, `pyOpenSSL==26.4.0`
-- **Frontend:** React `18.3.1`, TypeScript `5.6.3`, Vite `6.0.3`, Tailwind CSS `3.4.16`, TanStack Query `5.62.0`, Recharts `2.14.1`, Three.js `0.187.0`
-- **Testing:** `pytest==9.2.0`, `httpx==0.28.1`, `vitest==2.1.8`, `playwright==1.65.2`
+### Cryptographic Components
 
-## 9. Repository Structure
+| Component | Implementation |
+|---|---|
+| Post-quantum key encapsulation | ML-KEM-768 |
+| Symmetric encryption | AES-256-GCM |
+| Key derivation | HKDF-SHA-256 |
+| Message authentication | HMAC-SHA-256 |
+| Password hashing | Scrypt |
+| Authentication | WebAuthn / Passkeys |
+| Audit integrity | Hash-chained ledger |
+
+Cryptographic operations use established libraries rather than custom cryptographic primitives.
+
+## System Architecture
 
 ```text
-Team-Jarvis/
-├── README.md
-├── .gitignore
-├── .env.example
-├── requirements.txt
-├── track4_service.py
-├── threat-model.json
-├── vercel.json
-├── backend/
-│   ├── alembic/              # Migrations 0001 through 0011
-│   ├── app/                  # FastAPI routers, services, crypto, policy, audit, FIM, datalab
-│   └── tests/                # Backend pytest suite
-├── frontend/
-│   ├── src/                  # React + TypeScript + Vite console
-│   ├── package.json
-│   └── package-lock.json
-├── tests/adapter/            # Track 4 adapter tests
-├── scripts/                  # provision_admin.py, benchmark.py, verify_auth_playwright.py
-├── docs/                     # AUTHENTICATION.md, SECURITY_ARCHITECTURE.md, IMPLEMENTATION_STATUS.md
-├── reports/                  # Test reports, security assessments, benchmarks, brief PDF
-└── tools/Track-4-Toolkit/    # Local Track 4 toolkit (excluded from git via .gitignore)
+             Q-SHIELD Web Application
+                       |
+                React + TypeScript
+                       |
+                  FastAPI Backend
+                       |
+          Authentication & RBAC Layer
+                       |
+       +---------------+---------------+
+       |               |               |
+   Identity        Device &        Security
+   Management      Revocation      Services
+       |               |               |
+       +---------------+---------------+
+                       |
+             Cryptographic Services
+                       |
+              Audit & Detection
+                       |
+             Database / Storage
+                       |
+             Simulated Trust Nodes
 ```
 
-## 10. Installation and Setup
+## Technology Stack
 
-```powershell
-# Python 3.12 virtual environment & dependencies
+**Backend:** Python 3.12, FastAPI, SQLAlchemy, Alembic, Pydantic.
+
+**Frontend:** React, TypeScript, Vite, Tailwind CSS.
+
+**Security:** Scrypt, ML-KEM-768, AES-256-GCM, HKDF, HMAC, WebAuthn.
+
+**Database:** SQLite with SQLAlchemy and Alembic migrations.
+
+**Testing:** Pytest, HTTPX, Vitest, Playwright and the official Track 4 validator.
+
+## Repository Structure
+
+```text
+Q-SHIELD/
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── services/
+│   │   ├── models.py
+│   │   └── main.py
+│   ├── migrations/
+│   └── tests/
+├── frontend/
+│   └── src/
+│       ├── app/
+│       ├── components/
+│       ├── pages/
+│       └── services/
+├── docs/
+│   └── assets/
+├── scripts/
+├── tests/
+├── tools/
+├── track4_service.py
+├── requirements.txt
+└── README.md
+```
+
+## Setup & Execution
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/ADHARV-S-RAVI/Team-Jarvis.git
+cd Team-Jarvis
+```
+
+### 2. Backend setup
+
+```bash
 py -3.12 -m venv .venv
-.venv\Scripts\Activate.ps1
+```
+
+Activate the virtual environment and install dependencies:
+
+```bash
 pip install -r requirements.txt
+```
 
-# Apply database migrations (0001 through 0011)
+Configure the required environment variables using the project's environment example.
+
+Run database migrations:
+
+```bash
 py -3.12 -m alembic -c backend/alembic.ini upgrade head
+```
 
-# Optional: provision an initial Admin account offline
-py -3.12 scripts/provision_admin.py --actor-id admin1 --email admin1@example.com --password "YourStrongPassword#2026" --role Admin
+Start the backend:
 
-# Install frontend dependencies (Node.js 20+/24+)
+```bash
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+```
+
+### 3. Frontend setup
+
+```bash
 cd frontend
 npm ci
-cd ..
+npm run dev
 ```
 
-## 11. Running the Application
+Application endpoints:
 
-```powershell
-# Terminal 1 — Backend API (http://127.0.0.1:8000)
-py -3.12 -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+- Frontend: `http://127.0.0.1:5173`
+- Backend: `http://127.0.0.1:8000`
 
-# Terminal 2 — Frontend Console (http://127.0.0.1:5173)
-cd frontend
-npm run dev -- --host 127.0.0.1 --port 5173
-```
+Refer to the project configuration for environment-specific settings.
 
-## 12. Testing and Verification
+## Testing & Verification
 
-```powershell
-# Backend tests (includes RBAC, session secrets, WebAuthn, vault, audit, detector)
-py -3.12 -m pytest backend/tests/ -v
+The following results were reported by the development verification runs:
 
-# Track 4 adapter tests
-py -3.12 -m pytest tests/adapter/test_track4_service.py -v
+| Test Suite | Result |
+|---|---:|
+| Backend tests | 54 passed |
+| Adapter tests | 9 passed |
+| Frontend tests | 7 passed |
+| Frontend production build | Passed |
+| Official Track 4 validator | 21/21 passed |
+| Real-authentication Playwright E2E | Passed |
 
-# Official Track 4 validator
-cd tools/Track-4-Toolkit
+The reported authentication E2E workflow covers registration, login, invalid credentials, session persistence, role restrictions and logout.
+
+Run the official validator from the toolkit directory:
+
+```bash
 py -3.12 validate.py --entry "../../track4_service.py"
-cd ../..
+```
 
-# Frontend unit tests & production build
+Run backend tests:
+
+```bash
+py -3.12 -m pytest backend/tests/ -q
+```
+
+Run frontend tests and build:
+
+```bash
 cd frontend
 npm run test
 npm run build
-cd ..
-
-# Live Playwright real-auth E2E test
-py -3.12 scripts/verify_auth_playwright.py
 ```
 
-## 13. Evaluation Criteria Mapping
+Test counts should be updated whenever the test suite changes.
 
-| Criterion (Points) | Implementation | Evidence |
-|---|---|---|
-| Security Correctness (25) | `backend/app/policy/authz.py`, `rbac_auth_service.py`, `crypto/provider.py` | [independent_summary.md](reports/security_assessment/independent_summary.md) |
-| Live / Automated Security Assessment (25) | `scripts/run_security_assessment.py`, `scripts/verify_auth_playwright.py` | [summary.md](reports/security_assessment/summary.md) |
-| Functionality & Reliability (20) | `recovery/service.py`, `backups/service.py`, `alembic/` | [crash_matrix.md](reports/evidence/crash_matrix.md) |
-| Threat Model & Honesty (10) | `threat-model.json`, `docs/threat_model.md`, `docs/IMPLEMENTATION_STATUS.md` | [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) |
-| Performance & Overhead (10) | `scripts/benchmark.py`, zero-ML detector | [summary.md](reports/benchmarks/summary.md) |
-| Usability & Documentation (10) | `README.md`, `docs/AUTHENTICATION.md`, `reports/submission/QSHIELD_Project_Brief.pdf` | [QSHIELD_Project_Brief.pdf](reports/submission/QSHIELD_Project_Brief.pdf) |
+## Track 4 Evaluation Alignment
 
-See [docs/evaluation_mapping.md](docs/evaluation_mapping.md) for the complete mapping.
+| Evaluation Area | Q-SHIELD Evidence |
+|---|---|
+| Security Correctness | Authentication, RBAC, cryptographic protection, revocation and integrity controls. |
+| Live Security Assessment | Security assessment scripts, authorization tests and negative authentication scenarios. |
+| Functionality & Reliability | Device lifecycle, key rotation, recovery, protected resources and automated tests. |
+| Threat Model & Honesty | Documented security architecture, implementation status and limitations. |
+| Performance & Overhead | Benchmarking scripts and measured operation results. |
+| Usability & Documentation | Role-specific dashboards, authentication interface, setup instructions and technical documentation. |
 
-## 14. Screenshots
 
-*(Placeholders under `docs/assets/` — add captured images before final presentation if desired.)*
 
-- Project Banner: `docs/assets/banner.png`
-- Login Page: `docs/assets/login.png`
-- Registration Page: `docs/assets/register.png`
-- Passkey / Windows Hello Prompt: `docs/assets/passkey_prompt.png`
-- User Dashboard: `docs/assets/user_dashboard.png`
-- Admin Dashboard: `docs/assets/admin_dashboard.png`
-- Security Integrity Center: `docs/assets/security_integrity.png`
+## Team
 
-## 15. Security Limitations
+**Team Jarvis**  
+**Project:** Q-SHIELD — Quantum-Ready Trust & Revocation Control Plane  
+**Event:** Yugaantar DevForge  
+**Track:** Track 4 — Trust, but Verify
 
-- **Real Windows Hello Hardware:** Automated tests verify WebAuthn using synthetic P-256 fixtures; live Windows Hello hardware verification is `NOT VERIFIED` in headless CI.
-- **Facial Biometric Matching:** `NOT IMPLEMENTED`. The camera preview is a non-biometric visual checkpoint only.
-- **Simulated Nodes:** `sim-node-1..7` are in-process SQLite logical nodes, not physical distributed hosts.
-- **Forward Secrecy & ML-DSA:** `forward_secrecy` is `NOT ESTABLISHED`; `ML-DSA` is `NOT IMPLEMENTED`.
-- **Key Store:** Local filesystem `KeyMaterialStore` is a development store, not a hardware HSM.
+---
 
-## 16. Team Information
-
-- **Team:** Team Jarvis
-- **Competition:** Yugaantar DevForge — Track 4 (Trust, but Verify)
-- **Repository:** https://github.com/ADHARV-S-RAVI/Team-Jarvis
+*Built as a security-focused prototype demonstrating identity, trust, revocation and cryptographic control mechanisms.*
